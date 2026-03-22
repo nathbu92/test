@@ -1,30 +1,409 @@
-#!/usr/bin/env python3
-"""
-Serveur local pour StickerDrop — FFmpeg.wasm
-Lance : python server.py
-Ouvre : http://localhost:8080
-"""
-import http.server, os, sys
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>StickerDrop Vidéo</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Space+Mono:wght@400;700&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{--bg:#0e0e0e;--panel:#181818;--border:#2a2a2a;--accent:#f0e040;--accent2:#ff5f3f;--text:#e8e8e0;--muted:#666;--green:#4cff91;}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:'Space Mono',monospace;}
+.app{display:flex;flex-direction:column;height:100vh;}
 
-PORT = 8080
+/* TOPBAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--border);flex-shrink:0;gap:8px;flex-wrap:wrap;}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;letter-spacing:-0.03em;color:var(--accent);}
+.logo span{color:var(--muted);font-size:0.6rem;margin-left:8px;font-family:'Space Mono',monospace;font-weight:400;}
+.top-btns{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+.tbtn{padding:6px 12px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:'Space Mono',monospace;font-size:0.63rem;cursor:pointer;transition:all 0.15s;letter-spacing:0.04em;white-space:nowrap;}
+.tbtn:hover{border-color:var(--accent);color:var(--accent);}
+.tbtn.primary{background:var(--accent);border-color:var(--accent);color:#000;font-weight:700;}
+.tbtn.primary:hover{background:#fff;border-color:#fff;}
+.tbtn.danger{border-color:var(--accent2);color:var(--accent2);}
+.tbtn.danger:hover{background:var(--accent2);color:#fff;}
+.tbtn.rec{background:var(--accent2);border-color:var(--accent2);color:#fff;font-weight:700;animation:blink 1s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.6;}}
+.tbtn:disabled{opacity:0.3;cursor:not-allowed;pointer-events:none;}
 
-class Handler(http.server.SimpleHTTPRequestHandler):
-    def end_headers(self):
-        # Ces deux headers sont OBLIGATOIRES pour SharedArrayBuffer
-        self.send_header("Cross-Origin-Opener-Policy", "same-origin")
-        self.send_header("Cross-Origin-Embedder-Policy", "require-corp")
-        self.send_header("Cross-Origin-Resource-Policy", "cross-origin")
-        super().end_headers()
+.body{display:flex;flex:1;overflow:hidden;}
 
-    def log_message(self, fmt, *args):
-        print(f"  {args[0]} {args[1]}")
+/* SIDEBAR */
+.sidebar{width:196px;flex-shrink:0;background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;}
+@media(max-width:640px){.sidebar{position:fixed;bottom:0;left:0;right:0;width:100%;height:auto;flex-direction:row;overflow-x:auto;overflow-y:hidden;border-right:none;border-top:1px solid var(--border);z-index:30;}}
+.sec{padding:10px 12px;border-bottom:1px solid var(--border);flex-shrink:0;}
+@media(max-width:640px){.sec{border-bottom:none;border-right:1px solid var(--border);padding:8px 10px;}}
+.sec-title{font-size:0.58rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.stk-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;}
+.stk-btn{aspect-ratio:1;font-size:1.15rem;background:var(--bg);border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:2px;transition:all 0.1s;}
+.stk-btn:hover,.stk-btn.active{border-color:var(--accent);background:#1c1c00;}
+.ctrl{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.ctrl:last-child{margin-bottom:0;}
+.ctrl-lbl{font-size:0.56rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);width:38px;flex-shrink:0;}
+input[type=range]{flex:1;-webkit-appearance:none;height:3px;background:var(--border);border-radius:2px;outline:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;background:var(--accent);border-radius:50%;cursor:pointer;}
+.ctrl-val{font-size:0.58rem;color:var(--accent);width:30px;text-align:right;flex-shrink:0;}
+.info-row{display:flex;align-items:center;justify-content:space-between;font-size:0.6rem;color:var(--muted);margin-bottom:5px;}
+.info-row:last-child{margin-bottom:0;}
+.info-row b{color:var(--accent);}
 
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
-print(f"\n  StickerDrop — serveur local")
-print(f"  Ouvre http://localhost:{PORT}/stickerdrop-ffmpeg.html dans Chrome\n")
+/* CANVAS ZONE */
+.canvas-zone{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#111;overflow:hidden;position:relative;}
+@media(max-width:640px){.canvas-zone{padding-bottom:130px;}}
+.canvas-zone::before{content:'';position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:32px 32px;opacity:0.2;}
+.empty{position:absolute;display:flex;flex-direction:column;align-items:center;gap:12px;pointer-events:none;z-index:1;text-align:center;}
+.empty .ico{font-size:3rem;opacity:0.2;}
+.empty p{font-size:0.68rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;}
+#main-canvas{display:none;max-width:100%;max-height:calc(100% - 56px);cursor:crosshair;position:relative;z-index:2;touch-action:none;}
 
-with http.server.HTTPServer(("", PORT), Handler) as httpd:
-    try:
-        httpd.serve_forever()
-    except KeyboardInterrupt:
-        print("\n  Serveur arrêté.")
+/* VIDEO CONTROLS */
+.vid-bar{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);display:none;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--border);padding:6px 12px;z-index:5;width:min(460px,90%);}
+.vc-btn{width:28px;height:28px;background:none;border:1px solid var(--border);color:var(--text);font-size:0.8rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;flex-shrink:0;}
+.vc-btn:hover{border-color:var(--accent);color:var(--accent);}
+input[type=range].seek{-webkit-appearance:none;flex:1;height:3px;background:var(--border);border-radius:2px;outline:none;}
+input[type=range].seek::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;background:var(--accent);border-radius:50%;cursor:pointer;}
+.vc-time{font-size:0.58rem;color:var(--muted);white-space:nowrap;flex-shrink:0;min-width:72px;text-align:center;}
+
+/* EXPORT MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:100;display:none;align-items:center;justify-content:center;}
+.modal-bg.open{display:flex;}
+.modal{background:var(--panel);border:1px solid var(--border);padding:24px 28px;min-width:320px;max-width:92vw;display:flex;flex-direction:column;gap:14px;}
+.modal-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;color:var(--accent);}
+.modal-info{font-size:0.62rem;color:var(--muted);line-height:1.8;}
+.modal-info b{color:var(--text);}
+.modal-info .tag{display:inline-block;padding:1px 7px;font-size:0.55rem;border-radius:2px;font-weight:700;margin-left:4px;}
+.tag-ok{background:var(--green);color:#000;}
+.tag-warn{background:var(--accent);color:#000;}
+.progress-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
+.progress-fill{height:100%;background:var(--accent);transition:width 0.2s;}
+.progress-txt{font-size:0.6rem;color:var(--text);text-align:right;margin-top:4px;}
+
+/* REC indicator */
+.rec-indicator{position:absolute;top:14px;right:14px;display:none;align-items:center;gap:7px;background:rgba(255,95,63,0.15);border:1px solid var(--accent2);padding:5px 10px;z-index:10;font-size:0.62rem;color:var(--accent2);font-weight:700;letter-spacing:0.06em;}
+.rec-indicator.visible{display:flex;}
+.rec-dot{width:7px;height:7px;background:var(--accent2);border-radius:50%;animation:blink 1s infinite;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="logo">StickerDrop <span>// vidéo</span></div>
+    <div class="top-btns">
+      <button class="tbtn" onclick="document.getElementById('fi').click()">⬆ Importer</button>
+      <button class="tbtn danger" id="del-btn" onclick="deleteSelected()" disabled>✕ Suppr.</button>
+      <button class="tbtn" id="clear-btn" onclick="clearAll()" disabled>⌫ Effacer</button>
+      <button class="tbtn primary" id="export-btn" onclick="openExport()" disabled>↓ Exporter</button>
+    </div>
+  </div>
+
+  <div class="body">
+    <div class="sidebar">
+      <div class="sec"><div class="sec-title">Stickers</div><div class="stk-grid" id="stk-grid"></div></div>
+      <div class="sec">
+        <div class="sec-title">Sélection</div>
+        <div class="info-row"><span>Emoji :</span><b id="sel-emoji" style="font-size:1rem;">—</b></div>
+      </div>
+      <div class="sec">
+        <div class="sec-title">Ajuster</div>
+        <div class="ctrl"><span class="ctrl-lbl">Taille</span><input type="range" id="r-size" min="20" max="300" value="80"><span class="ctrl-val" id="v-size">80</span></div>
+        <div class="ctrl"><span class="ctrl-lbl">Rotation</span><input type="range" id="r-rot" min="-180" max="180" value="0"><span class="ctrl-val" id="v-rot">0°</span></div>
+        <div class="ctrl"><span class="ctrl-lbl">Opacité</span><input type="range" id="r-opa" min="10" max="100" value="100"><span class="ctrl-val" id="v-opa">100%</span></div>
+      </div>
+      <div class="sec">
+        <div class="info-row"><span>Vidéo :</span><b id="info-res">—</b></div>
+        <div class="info-row"><span>Durée :</span><b id="info-dur">—</b></div>
+        <div class="info-row"><span>Stickers :</span><b id="stk-count">0</b></div>
+      </div>
+    </div>
+
+    <div class="canvas-zone" id="canvas-zone">
+      <div class="empty" id="empty"><span class="ico">🎬</span><p>Importe une vidéo</p></div>
+      <canvas id="main-canvas"></canvas>
+      <div class="rec-indicator" id="rec-indicator"><span class="rec-dot"></span>REC</div>
+      <div class="vid-bar" id="vid-bar">
+        <button class="vc-btn" id="play-btn" onclick="togglePlay()">▶</button>
+        <input type="range" class="seek" id="seek" min="0" max="100" value="0" step="0.01">
+        <span class="vc-time" id="vc-time">0:00 / 0:00</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EXPORT MODAL -->
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <div class="modal-title">Export — MediaRecorder</div>
+    <div class="modal-info">
+      Méthode : <b>MediaRecorder temps réel</b><span class="tag tag-ok">SANS HEADERS</span><span class="tag tag-ok">GITHUB PAGES</span><br>
+      La vidéo joue depuis le début jusqu'à la fin.<br>
+      Le canvas (vidéo + stickers) est capturé en direct.<br>
+      Durée d'export = <b id="modal-dur">—</b> — codec : <b id="modal-codec">—</b>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="pf" style="width:0%"></div></div>
+    <div class="progress-txt" id="pt">En attente…</div>
+    <div style="display:flex;gap:8px;">
+      <button class="tbtn primary" id="go-btn" onclick="startExport()" style="flex:1;">▶ Lancer l'export</button>
+      <button class="tbtn" id="close-btn" onclick="closeModal()">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="fi" accept="video/*" style="display:none">
+<video id="vid" style="display:none" playsinline preload="auto"></video>
+
+<script>
+const EMOJIS=['😀','😂','😎','🤩','😍','🤡','👻','💀','🔥','💥','⭐','❤️','💩','🤌','👆','🎉','🫠','🤖','😈','🥸','🫡','🌈','💫','🙈','👽','🫶','💯','🎯','✨','🧠'];
+
+let currentEmoji='😀', stickers=[], selectedId=null, uidCounter=0;
+let vidLoaded=false, rafId=null, videoFileData=null;
+let isRecording=false, recorder=null, recChunks=[];
+
+const vid=document.getElementById('vid');
+const canvas=document.getElementById('main-canvas');
+const ctx=canvas.getContext('2d');
+
+// ── Sticker grid ──
+const grid=document.getElementById('stk-grid');
+EMOJIS.forEach(e=>{
+  const b=document.createElement('button');
+  b.className='stk-btn'; b.textContent=e;
+  b.onclick=()=>{document.querySelectorAll('.stk-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');currentEmoji=e;};
+  grid.appendChild(b);
+});
+grid.firstChild.classList.add('active');
+
+// ── File load ──
+document.getElementById('fi').addEventListener('change', async e=>{
+  const f=e.target.files[0]; if(!f) return;
+  videoFileData=f;
+  const url=URL.createObjectURL(f);
+  vid.src=url; vid.load();
+  vid.oncanplay=()=>{
+    if(vidLoaded) return; vidLoaded=true;
+    fitCanvas();
+    document.getElementById('empty').style.display='none';
+    canvas.style.display='block';
+    document.getElementById('vid-bar').style.display='flex';
+    document.getElementById('export-btn').disabled=false;
+    document.getElementById('clear-btn').disabled=false;
+    document.getElementById('seek').max=vid.duration;
+    document.getElementById('info-res').textContent=vid.videoWidth+'x'+vid.videoHeight;
+    document.getElementById('info-dur').textContent=fmtTime(vid.duration);
+    clearAll(); startLoop();
+  };
+  vid.onerror=()=>alert('Format non supporté par ce navigateur.');
+  e.target.value='';
+});
+
+function fitCanvas(){
+  const zone=document.getElementById('canvas-zone');
+  const maxW=zone.clientWidth, maxH=zone.clientHeight-56;
+  const r=vid.videoWidth/vid.videoHeight;
+  let w=maxW, h=maxW/r; if(h>maxH){h=maxH;w=maxH*r;}
+  canvas.width=Math.round(w); canvas.height=Math.round(h);
+  canvas.style.width=canvas.width+'px'; canvas.style.height=canvas.height+'px';
+}
+window.addEventListener('resize',()=>{if(vidLoaded)fitCanvas();});
+
+// ── Render loop ──
+function startLoop(){
+  if(rafId) cancelAnimationFrame(rafId);
+  (function loop(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    try{ctx.drawImage(vid,0,0,canvas.width,canvas.height);}catch(e){}
+    const sx=canvas.width/vid.videoWidth, sy=canvas.height/vid.videoHeight, sc=Math.min(sx,sy);
+    stickers.forEach(s=>{
+      const px=s.x*sx, py=s.y*sy, fs=s.size*sc;
+      ctx.save(); ctx.globalAlpha=s.opa/100; ctx.translate(px,py); ctx.rotate(s.rot*Math.PI/180);
+      ctx.font=fs+'px serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(s.emoji,0,0);
+      if(s.id===selectedId && !isRecording){
+        const half=fs*0.55; ctx.globalAlpha=1; ctx.strokeStyle='#f0e040'; ctx.lineWidth=2;
+        ctx.strokeRect(-half,-half,half*2,half*2);
+        ctx.fillStyle='#ff5f3f'; ctx.beginPath(); ctx.arc(-half,-half,9,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle='#fff'; ctx.font='bold 11px sans-serif';
+        ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('x',-half,-half);
+      }
+      ctx.restore();
+    });
+    if(!vid.paused&&!vid.ended){
+      document.getElementById('seek').value=vid.currentTime;
+      document.getElementById('vc-time').textContent=fmtTime(vid.currentTime)+' / '+fmtTime(vid.duration);
+      // Update progress bar during export
+      if(isRecording){
+        const pct=Math.round((vid.currentTime/vid.duration)*100);
+        document.getElementById('pf').style.width=pct+'%';
+        document.getElementById('pt').textContent=pct+'% — '+fmtTime(vid.currentTime)+' / '+fmtTime(vid.duration);
+      }
+    }
+    rafId=requestAnimationFrame(loop);
+  })();
+}
+
+// ── Canvas interaction ──
+canvas.addEventListener('pointerdown', e=>{
+  if(!vidLoaded||isRecording) return; e.preventDefault();
+  const rect=canvas.getBoundingClientRect();
+  const cx=(e.clientX-rect.left)*(canvas.width/rect.width);
+  const cy=(e.clientY-rect.top)*(canvas.height/rect.height);
+  const sx=canvas.width/vid.videoWidth, sy=canvas.height/vid.videoHeight, sc=Math.min(sx,sy);
+
+  // delete handle
+  if(selectedId!==null){
+    const sel=stickers.find(s=>s.id===selectedId);
+    if(sel){const px=sel.x*sx,py=sel.y*sy,half=sel.size*sc*0.55;if(Math.hypot(cx-(px-half),cy-(py-half))<12){deleteSelected();return;}}
+  }
+
+  // hit test
+  let hit=null;
+  for(let i=stickers.length-1;i>=0;i--){const s=stickers[i];const px=s.x*sx,py=s.y*sy,half=s.size*sc*0.55;if(Math.abs(cx-px)<half&&Math.abs(cy-py)<half){hit=s;break;}}
+
+  if(hit){
+    selectSticker(hit.id);
+    const ox=hit.x,oy=hit.y,startX=e.clientX,startY=e.clientY;
+    const onMove=ev=>{hit.x=ox+(ev.clientX-startX)*(canvas.width/rect.width)/sx;hit.y=oy+(ev.clientY-startY)*(canvas.height/rect.height)/sy;};
+    const onUp=()=>{document.removeEventListener('pointermove',onMove);document.removeEventListener('pointerup',onUp);};
+    document.addEventListener('pointermove',onMove); document.addEventListener('pointerup',onUp);
+  } else {
+    const s={id:uidCounter++,emoji:currentEmoji,x:cx/sx,y:cy/sy,
+      size:parseInt(document.getElementById('r-size').value),
+      rot:parseInt(document.getElementById('r-rot').value),
+      opa:parseInt(document.getElementById('r-opa').value)};
+    stickers.push(s); selectSticker(s.id); updateCount();
+  }
+});
+
+function selectSticker(id){
+  selectedId=id; const s=stickers.find(x=>x.id===id); if(!s) return;
+  document.getElementById('sel-emoji').textContent=s.emoji;
+  ['size','rot','opa'].forEach(p=>{
+    document.getElementById('r-'+p).value=s[p];
+    document.getElementById('v-'+p).textContent=s[p]+(p==='rot'?'°':p==='opa'?'%':'');
+  });
+  document.getElementById('del-btn').disabled=false;
+}
+function deleteSelected(){stickers=stickers.filter(s=>s.id!==selectedId);selectedId=null;document.getElementById('sel-emoji').textContent='—';document.getElementById('del-btn').disabled=true;updateCount();}
+function clearAll(){stickers=[];selectedId=null;document.getElementById('sel-emoji').textContent='—';document.getElementById('del-btn').disabled=true;updateCount();}
+function updateCount(){document.getElementById('stk-count').textContent=stickers.length;}
+
+;['size','rot','opa'].forEach(p=>{
+  const r=document.getElementById('r-'+p),v=document.getElementById('v-'+p);
+  r.addEventListener('input',()=>{const val=parseFloat(r.value);v.textContent=val+(p==='rot'?'°':p==='opa'?'%':'');if(selectedId!==null){const s=stickers.find(x=>x.id===selectedId);if(s)s[p]=val;}});
+});
+
+function togglePlay(){
+  if(!vidLoaded||isRecording) return;
+  if(vid.paused){vid.play();document.getElementById('play-btn').textContent='⏸';}
+  else{vid.pause();document.getElementById('play-btn').textContent='▶';}
+}
+vid.onended=()=>{document.getElementById('play-btn').textContent='▶'; if(isRecording) stopExport();};
+document.getElementById('seek').addEventListener('input',function(){if(vidLoaded&&!isRecording)vid.currentTime=parseFloat(this.value);});
+function fmtTime(s){if(isNaN(s))return'0:00';const m=Math.floor(s/60),sec=Math.floor(s%60);return m+':'+(sec<10?'0':'')+sec;}
+
+// ── Export modal ──
+function openExport(){
+  if(!vidLoaded) return;
+  const codec=MediaRecorder.isTypeSupported('video/webm;codecs=vp9')?'VP9 (.webm)':
+               MediaRecorder.isTypeSupported('video/webm;codecs=vp8')?'VP8 (.webm)':
+               MediaRecorder.isTypeSupported('video/mp4')?'H.264 (.mp4)':'webm';
+  document.getElementById('modal-dur').textContent=fmtTime(vid.duration);
+  document.getElementById('modal-codec').textContent=codec;
+  document.getElementById('pf').style.width='0%';
+  document.getElementById('pt').textContent='En attente…';
+  document.getElementById('go-btn').disabled=false;
+  document.getElementById('go-btn').textContent='▶ Lancer l\'export';
+  document.getElementById('close-btn').disabled=false;
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal(){if(!isRecording)document.getElementById('modal').classList.remove('open');}
+
+// ── Export — MediaRecorder realtime ──
+function startExport(){
+  if(!vidLoaded||!stickers.length){alert('Charge une vidéo et ajoute au moins un sticker.');return;}
+  if(isRecording) return;
+
+  // Export canvas at native video resolution for best quality
+  const expCanvas=document.createElement('canvas');
+  expCanvas.width=vid.videoWidth; expCanvas.height=vid.videoHeight;
+  const expCtx=expCanvas.getContext('2d');
+
+  const mimeType=MediaRecorder.isTypeSupported('video/webm;codecs=vp9')?'video/webm;codecs=vp9':
+                 MediaRecorder.isTypeSupported('video/webm;codecs=vp8')?'video/webm;codecs=vp8':
+                 MediaRecorder.isTypeSupported('video/mp4')?'video/mp4':'video/webm';
+  const ext=mimeType.includes('mp4')?'mp4':'webm';
+
+  try{
+    recorder=new MediaRecorder(expCanvas.captureStream(30),{mimeType,videoBitsPerSecond:6_000_000});
+  }catch(e){
+    alert('MediaRecorder non supporté : '+e.message); return;
+  }
+
+  recChunks=[];
+  recorder.ondataavailable=e=>{if(e.data.size>0)recChunks.push(e.data);};
+  recorder.onstop=()=>{
+    isRecording=false;
+    cancelAnimationFrame(expRaf);
+    document.getElementById('rec-indicator').classList.remove('visible');
+    document.getElementById('go-btn').disabled=false;
+    document.getElementById('go-btn').textContent='▶ Relancer';
+    document.getElementById('close-btn').disabled=false;
+    document.getElementById('pf').style.width='100%';
+    document.getElementById('pt').textContent='100% — Terminé !';
+
+    const blob=new Blob(recChunks,{type:mimeType});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download='stickerdrop.'+ext;
+    a.click();
+  };
+
+  // Draw loop on export canvas (native resolution, no UI chrome)
+  let expRaf;
+  function expLoop(){
+    expCtx.clearRect(0,0,expCanvas.width,expCanvas.height);
+    try{expCtx.drawImage(vid,0,0,expCanvas.width,expCanvas.height);}catch(e){}
+    stickers.forEach(s=>{
+      expCtx.save();
+      expCtx.globalAlpha=s.opa/100;
+      expCtx.translate(s.x,s.y);
+      expCtx.rotate(s.rot*Math.PI/180);
+      expCtx.font=s.size+'px serif';
+      expCtx.textAlign='center'; expCtx.textBaseline='middle';
+      expCtx.fillText(s.emoji,0,0);
+      expCtx.restore();
+    });
+    expRaf=requestAnimationFrame(expLoop);
+  }
+
+  // Start everything
+  isRecording=true;
+  document.getElementById('go-btn').disabled=true;
+  document.getElementById('go-btn').textContent='⏺ En cours…';
+  document.getElementById('close-btn').disabled=true;
+  document.getElementById('rec-indicator').classList.add('visible');
+  document.getElementById('play-btn').textContent='⏸';
+
+  vid.currentTime=0;
+  vid.oncanplay=null;
+
+  // Wait for seek to complete then start
+  vid.onseeked=()=>{
+    vid.onseeked=null;
+    recorder.start(100); // collect data every 100ms
+    expLoop();
+    vid.play();
+  };
+  // If already at 0 just go
+  if(vid.currentTime===0||vid.readyState>=3){
+    vid.onseeked=null;
+    recorder.start(100);
+    expLoop();
+    vid.play();
+  }
+}
+
+function stopExport(){
+  if(recorder&&recorder.state!=='inactive') recorder.stop();
+}
+</script>
+</body>
+</html>
