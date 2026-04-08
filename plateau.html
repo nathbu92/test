@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plateau — Impro Scoreboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root { --bg: #060608; --accent1: #ff3b3b; --accent2: #3b9eff; --text: #ffffff; --muted: #444; --surface: #111116; --yellow: #ffd60a; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Mono', monospace; min-height: 100vh; overflow: hidden; }
+
+  #selectorScreen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 40px; gap: 20px; }
+  #selectorScreen h1 { font-family: 'Bebas Neue', sans-serif; font-size: 4rem; letter-spacing: 10px; text-align: center; }
+  #selectorScreen p { color: var(--muted); font-size: 0.8rem; letter-spacing: 2px; text-align: center; }
+
+  .comp-select { width: 100%; max-width: 560px; background: var(--surface); border: 1px solid #222; color: var(--text); font-family: 'DM Mono', monospace; font-size: 0.85rem; padding: 14px 16px; border-radius: 8px; outline: none; cursor: pointer; }
+  .btn-refresh { background: transparent; border: 1px solid #333; color: var(--muted); font-family: 'DM Mono', monospace; font-size: 0.75rem; padding: 8px 16px; border-radius: 6px; cursor: pointer; }
+  .btn-refresh:hover { border-color: #555; color: var(--text); }
+  .btn-launch { background: var(--accent1); color: #fff; border: none; font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: 4px; padding: 16px 40px; border-radius: 10px; cursor: pointer; transition: opacity 0.15s; }
+  .btn-launch:hover { opacity: 0.85; }
+  .btn-launch:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  #scoreScreen { display: none; height: 100vh; flex-direction: column; position: relative; }
+  .back-btn { position: absolute; top: 16px; left: 16px; background: transparent; border: 1px solid #222; color: var(--muted); font-family: 'DM Mono', monospace; font-size: 0.7rem; padding: 6px 12px; border-radius: 6px; cursor: pointer; z-index: 10; }
+  .back-btn:hover { border-color: #444; color: var(--text); }
+  .comp-title { text-align: center; font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 6px; color: var(--muted); padding-top: 20px; }
+
+  .arena { flex: 1; display: grid; grid-template-columns: 1fr 60px 1fr; align-items: center; padding: 20px; }
+  .team-side { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+  .team-label { font-family: 'Bebas Neue', sans-serif; font-size: clamp(1.4rem, 4vw, 2.4rem); letter-spacing: 4px; text-align: center; }
+  .team-side.left .team-label { color: var(--accent1); }
+  .team-side.right .team-label { color: var(--accent2); }
+  .score-num { font-family: 'Bebas Neue', sans-serif; font-size: clamp(6rem, 18vw, 14rem); line-height: 0.9; text-align: center; transition: transform 0.15s ease; }
+  .team-side.left .score-num { color: var(--accent1); }
+  .team-side.right .score-num { color: var(--accent2); }
+  .score-num.bump { transform: scale(1.12); }
+
+  .faults-row { display: flex; gap: 10px; align-items: center; }
+  .fault-dot { width: clamp(14px, 2.5vw, 22px); height: clamp(14px, 2.5vw, 22px); border-radius: 50%; border: 2px solid #333; transition: background 0.2s; }
+  .fault-dot.active.left { background: var(--accent1); border-color: var(--accent1); }
+  .fault-dot.active.right { background: var(--accent2); border-color: var(--accent2); }
+  .faults-label-txt { font-size: clamp(0.5rem, 1.5vw, 0.72rem); color: var(--muted); letter-spacing: 2px; }
+  .divider { display: flex; align-items: center; justify-content: center; color: var(--muted); font-family: 'Bebas Neue', sans-serif; font-size: 2rem; }
+
+  .bottom-bar { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 12px 20px 20px; color: var(--muted); font-size: 0.68rem; letter-spacing: 1px; }
+  .pulse-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); animation: pulse 2s infinite; }
+  .pulse-dot.live { background: var(--yellow); }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+</style>
+</head>
+<body>
+
+<div id="selectorScreen">
+  <h1>IMPRO<br>SCOREBOARD</h1>
+  <p>VUE PLATEAU / SPECTATEURS</p>
+  <select class="comp-select" id="compList" onchange="document.getElementById('launchBtn').disabled = !this.value">
+    <option value="">— Chargement… —</option>
+  </select>
+  <button class="btn-refresh" onclick="fetchCompetitions()">↻ Rafraîchir</button>
+  <button class="btn-launch" id="launchBtn" onclick="launchScoreboard()" disabled>AFFICHER LE PLATEAU</button>
+</div>
+
+<div id="scoreScreen">
+  <button class="back-btn" onclick="goBack()">← Retour</button>
+  <div class="comp-title" id="compTitleDisplay"></div>
+  <div class="arena">
+    <div class="team-side left">
+      <div class="team-label" id="team1Name">ÉQUIPE 1</div>
+      <div class="score-num" id="score1">0</div>
+      <div class="faults-row">
+        <span class="faults-label-txt">FAUTES</span>
+        <div class="fault-dot left" id="f1_1"></div>
+        <div class="fault-dot left" id="f1_2"></div>
+        <div class="fault-dot left" id="f1_3"></div>
+      </div>
+    </div>
+    <div class="divider">—</div>
+    <div class="team-side right">
+      <div class="team-label" id="team2Name">ÉQUIPE 2</div>
+      <div class="score-num" id="score2">0</div>
+      <div class="faults-row">
+        <div class="fault-dot right" id="f2_1"></div>
+        <div class="fault-dot right" id="f2_2"></div>
+        <div class="fault-dot right" id="f2_3"></div>
+        <span class="faults-label-txt">FAUTES</span>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-bar">
+    <div class="pulse-dot" id="pulseDot"></div>
+    <span id="lastUpdate">—</span>
+  </div>
+</div>
+
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxBQNBaa3vgQbtNjb2wVjdbM9mMHcYohuLnTQIMJAJ5el2y2qyT76lcspSPqTLUrAnG/exec";
+
+let currentComp = '';
+let pollInterval = null;
+let prevState = {};
+
+// ---- JSONP ----
+let _cbIndex = 0;
+function jsonp(params) {
+  return new Promise((resolve, reject) => {
+    const cbName = '__jsonp_' + (++_cbIndex);
+    const url = new URL(SCRIPT_URL);
+    Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+    url.searchParams.set('callback', cbName);
+
+    const script = document.createElement('script');
+    const timer = setTimeout(() => { cleanup(); reject(new Error('Timeout')); }, 10000);
+
+    window[cbName] = (data) => { cleanup(); resolve(data); };
+
+    function cleanup() {
+      clearTimeout(timer);
+      delete window[cbName];
+      if (script.parentNode) script.parentNode.removeChild(script);
+    }
+
+    script.onerror = () => { cleanup(); reject(new Error('Erreur réseau')); };
+    script.src = url.toString();
+    document.head.appendChild(script);
+  });
+}
+
+window.onload = () => fetchCompetitions();
+
+async function fetchCompetitions() {
+  try {
+    const data = await jsonp({ action: 'getCompetitions' });
+    const sel = document.getElementById('compList');
+    if (!data || data.error) { sel.innerHTML = '<option value="">— Erreur —</option>'; return; }
+    sel.innerHTML = '<option value="">— Sélectionner une compétition —</option>';
+    (data.competitions || []).forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c.name;
+      opt.textContent = c.name;
+      sel.appendChild(opt);
+    });
+    document.getElementById('launchBtn').disabled = true;
+  } catch(e) {}
+}
+
+function launchScoreboard() {
+  currentComp = document.getElementById('compList').value;
+  if (!currentComp) return;
+  document.getElementById('compTitleDisplay').textContent = currentComp.toUpperCase();
+  document.getElementById('selectorScreen').style.display = 'none';
+  document.getElementById('scoreScreen').style.display = 'flex';
+  startPolling();
+}
+
+function goBack() {
+  stopPolling();
+  document.getElementById('scoreScreen').style.display = 'none';
+  document.getElementById('selectorScreen').style.display = 'flex';
+}
+
+function startPolling() {
+  fetchAndRender();
+  pollInterval = setInterval(fetchAndRender, 3000);
+  document.getElementById('pulseDot').classList.add('live');
+}
+
+function stopPolling() {
+  clearInterval(pollInterval);
+  document.getElementById('pulseDot').classList.remove('live');
+}
+
+async function fetchAndRender() {
+  try {
+    const data = await jsonp({ action: 'getScore', comp: currentComp });
+    if (!data || data.error) return;
+
+    const s1Changed = data.score1 !== prevState.score1;
+    const s2Changed = data.score2 !== prevState.score2;
+
+    document.getElementById('team1Name').textContent = data.team1;
+    document.getElementById('team2Name').textContent = data.team2;
+    updateScore('score1', data.score1, s1Changed);
+    updateScore('score2', data.score2, s2Changed);
+    updateFaults(1, data.faults1);
+    updateFaults(2, data.faults2);
+
+    const d = new Date(data.lastUpdate);
+    document.getElementById('lastUpdate').textContent =
+      'Sync ' + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+    prevState = { ...data };
+  } catch(e) {}
+}
+
+function updateScore(id, value, changed) {
+  const el = document.getElementById(id);
+  el.textContent = value;
+  if (changed) {
+    el.classList.remove('bump');
+    void el.offsetWidth;
+    el.classList.add('bump');
+    setTimeout(() => el.classList.remove('bump'), 200);
+  }
+}
+
+function updateFaults(team, count) {
+  for (let i = 1; i <= 3; i++) {
+    const dot = document.getElementById(`f${team}_${i}`);
+    const side = team === 1 ? 'left' : 'right';
+    dot.className = 'fault-dot ' + side + (i <= count ? ' active' : '');
+  }
+}
+</script>
+</body>
+</html>
