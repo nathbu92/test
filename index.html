@@ -3,375 +3,238 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Notif Torture 3000</title>
+<title>Admin — Impro Scoreboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Bebas+Neue&display=swap');
-
   :root {
-    --bg: #0a0a0a;
-    --card: #111;
-    --border: #222;
-    --yellow: #f5e642;
-    --red: #ff3c3c;
-    --green: #3cffa0;
-    --text: #e0e0e0;
-    --muted: #555;
+    --bg: #0d0d0d;
+    --surface: #1a1a1a;
+    --border: #2e2e2e;
+    --accent1: #ff4d4d;
+    --accent2: #4daaff;
+    --text: #f0f0f0;
+    --muted: #666;
+    --green: #3ddc84;
+    --yellow: #ffd60a;
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Space Mono', monospace;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem;
-    overflow-x: hidden;
-  }
-
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: 
-      repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(255,255,255,0.015) 40px, rgba(255,255,255,0.015) 41px),
-      repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(255,255,255,0.015) 40px, rgba(255,255,255,0.015) 41px);
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .container {
-    position: relative;
-    z-index: 1;
-    max-width: 560px;
-    width: 100%;
-  }
-
-  .title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(3rem, 10vw, 5.5rem);
-    letter-spacing: 0.05em;
-    line-height: 1;
-    color: var(--yellow);
-    text-shadow: 4px 4px 0 #3a3800;
-    margin-bottom: 0.2rem;
-  }
-
-  .subtitle {
-    color: var(--muted);
-    font-size: 0.7rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    margin-bottom: 2.5rem;
-  }
-
-  .card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 2rem;
-    margin-bottom: 1.5rem;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, var(--yellow), transparent);
-  }
-
-  .status-row {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: var(--muted);
-    flex-shrink: 0;
-    transition: background 0.3s;
-  }
-  .dot.active { background: var(--green); box-shadow: 0 0 8px var(--green); animation: pulse 2s infinite; }
-  .dot.denied { background: var(--red); }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
-  }
-
-  #status-text {
-    font-size: 0.75rem;
-    color: var(--muted);
-    letter-spacing: 0.1em;
-  }
-
-  .btn {
-    display: block;
-    width: 100%;
-    padding: 1rem 1.5rem;
-    font-family: 'Space Mono', monospace;
-    font-size: 0.85rem;
-    font-weight: 700;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    border: none;
-    border-radius: 3px;
-    cursor: pointer;
-    transition: all 0.15s;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .btn-enable {
-    background: var(--yellow);
-    color: #000;
-  }
-  .btn-enable:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245,230,66,0.3); }
-  .btn-enable:active { transform: translateY(0); }
-  .btn-enable:disabled { opacity: 0.3; cursor: not-allowed; transform: none; box-shadow: none; }
-
-  .btn-test {
-    background: transparent;
-    color: var(--green);
-    border: 1px solid var(--green);
-    margin-top: 0.75rem;
-  }
-  .btn-test:hover { background: rgba(60,255,160,0.08); }
-  .btn-test:disabled { opacity: 0.3; cursor: not-allowed; }
-
-  .btn-stop {
-    background: transparent;
-    color: var(--red);
-    border: 1px solid var(--red);
-    margin-top: 0.75rem;
-  }
-  .btn-stop:hover { background: rgba(255,60,60,0.08); }
-  .btn-stop:disabled { opacity: 0.3; cursor: not-allowed; }
-
-  .log-section {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 1.5rem;
-  }
-
-  .log-title {
-    font-size: 0.65rem;
-    color: var(--muted);
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    margin-bottom: 1rem;
-  }
-
-  #log {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-    max-height: 180px;
-    overflow-y: auto;
-  }
-
-  #log li {
-    font-size: 0.7rem;
-    color: var(--muted);
-    padding: 0.4rem 0.6rem;
-    background: rgba(255,255,255,0.02);
-    border-left: 2px solid var(--border);
-    border-radius: 2px;
-    animation: fadeIn 0.3s ease;
-  }
-
-  #log li.ok { border-color: var(--green); color: var(--green); }
-  #log li.err { border-color: var(--red); color: var(--red); }
-  #log li.info { border-color: var(--yellow); color: var(--yellow); }
-
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateX(-6px); }
-    to { opacity: 1; transform: translateX(0); }
-  }
-
-  .timer-badge {
-    display: inline-block;
-    margin-top: 1rem;
-    padding: 0.3rem 0.8rem;
-    background: rgba(245,230,66,0.08);
-    border: 1px solid rgba(245,230,66,0.2);
-    border-radius: 2px;
-    font-size: 0.65rem;
-    color: var(--yellow);
-    letter-spacing: 0.15em;
-  }
-
-  #timer-display { display: none; }
-
-  .footer {
-    margin-top: 1.5rem;
-    font-size: 0.6rem;
-    color: var(--muted);
-    text-align: center;
-    letter-spacing: 0.1em;
-    line-height: 1.8;
-  }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Mono', monospace; min-height: 100vh; padding: 20px; }
+  h1 { font-family: 'Bebas Neue', sans-serif; font-size: 2.4rem; letter-spacing: 4px; margin-bottom: 4px; }
+  .subtitle { color: var(--muted); font-size: 0.75rem; margin-bottom: 30px; }
+  .panels { display: grid; grid-template-columns: 300px 1fr; gap: 20px; }
+  @media (max-width: 700px) { .panels { grid-template-columns: 1fr; } }
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+  .panel-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; letter-spacing: 3px; color: var(--muted); margin-bottom: 16px; }
+  .field { margin-bottom: 12px; }
+  .field label { display: block; font-size: 0.7rem; color: var(--muted); margin-bottom: 4px; }
+  .field input { width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 0.85rem; padding: 10px 12px; border-radius: 6px; outline: none; }
+  .field input:focus { border-color: var(--accent2); }
+  .btn-create { width: 100%; background: var(--green); color: #000; border: none; font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; letter-spacing: 2px; padding: 12px; border-radius: 8px; cursor: pointer; margin-top: 6px; }
+  .btn-create:hover { opacity: 0.85; }
+  .select-comp { width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 0.8rem; padding: 10px 12px; border-radius: 6px; outline: none; margin-bottom: 12px; cursor: pointer; }
+  .btn-sm { background: var(--accent2); color: #000; border: none; font-family: 'DM Mono', monospace; font-weight: 500; font-size: 0.75rem; padding: 8px 14px; border-radius: 6px; cursor: pointer; width: 100%; text-align: center; }
+  .btn-sm:hover { opacity: 0.85; }
+  .scoreboard { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .team-block { border-radius: 10px; padding: 20px; border: 2px solid transparent; }
+  .team-block.team1 { background: rgba(255,77,77,0.06); border-color: rgba(255,77,77,0.2); }
+  .team-block.team2 { background: rgba(77,170,255,0.06); border-color: rgba(77,170,255,0.2); }
+  .team-name { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; letter-spacing: 3px; margin-bottom: 12px; text-align: center; }
+  .team-block.team1 .team-name { color: var(--accent1); }
+  .team-block.team2 .team-name { color: var(--accent2); }
+  .score-display { font-family: 'Bebas Neue', sans-serif; font-size: 5rem; text-align: center; line-height: 1; margin-bottom: 16px; }
+  .team-block.team1 .score-display { color: var(--accent1); }
+  .team-block.team2 .score-display { color: var(--accent2); }
+  .score-btns { display: flex; gap: 8px; justify-content: center; margin-bottom: 20px; }
+  .btn-score { width: 52px; height: 52px; border: none; border-radius: 8px; font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; cursor: pointer; transition: transform 0.1s; }
+  .btn-score:active { transform: scale(0.93); }
+  .btn-plus { background: var(--green); color: #000; }
+  .btn-minus { background: var(--border); color: var(--text); }
+  .faults-label { font-size: 0.65rem; color: var(--muted); text-align: center; margin-bottom: 8px; letter-spacing: 2px; }
+  .faults-dots { display: flex; justify-content: center; gap: 10px; margin-bottom: 10px; }
+  .dot { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--border); transition: background 0.15s; }
+  .dot.active.team1 { background: var(--accent1); border-color: var(--accent1); }
+  .dot.active.team2 { background: var(--accent2); border-color: var(--accent2); }
+  .fault-btn { display: block; width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--yellow); font-family: 'DM Mono', monospace; font-size: 0.72rem; cursor: pointer; text-align: center; }
+  .fault-btn:hover { background: rgba(255,214,10,0.08); }
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--green); color: #000; font-family: 'DM Mono', monospace; font-size: 0.78rem; padding: 10px 20px; border-radius: 30px; transition: transform 0.3s ease; z-index: 100; }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.error { background: var(--accent1); color: #fff; }
+  .no-comp { text-align: center; color: var(--muted); font-size: 0.8rem; padding: 40px 0; }
 </style>
 </head>
 <body>
 
-<div class="container">
-  <div class="title">Notif<br>Torture</div>
-  <div class="subtitle">// testeur de notifications &mdash; v3000</div>
+<h1>IMPRO ADMIN</h1>
+<p class="subtitle">Panneau de contrôle des scores</p>
 
-  <div class="card">
-    <div class="status-row">
-      <div class="dot" id="dot"></div>
-      <span id="status-text">PERMISSION : EN ATTENTE DE TOI</span>
+<div class="panels">
+  <div>
+    <div class="panel" style="margin-bottom:16px">
+      <div class="panel-title">NOUVELLE COMPÉTITION</div>
+      <div class="field"><label>NOM DE LA COMPÉTITION</label><input type="text" id="newCompName" placeholder="Ex: Finale Printemps 2025" /></div>
+      <div class="field"><label>ÉQUIPE 1</label><input type="text" id="newTeam1" placeholder="Les Illuminés" /></div>
+      <div class="field"><label>ÉQUIPE 2</label><input type="text" id="newTeam2" placeholder="Les Farceurs" /></div>
+      <button class="btn-create" onclick="createCompetition()">+ CRÉER</button>
     </div>
-
-    <button class="btn btn-enable" id="btn-enable" onclick="activerNotifs()">
-      ⚡ Activer les notifications
-    </button>
-    <button class="btn btn-test" id="btn-test" onclick="envoyerNotif()" disabled>
-      🔔 Envoyer une notif maintenant
-    </button>
-    <button class="btn btn-stop" id="btn-stop" onclick="stopTimer()" disabled>
-      🛑 Stopper le déluge
-    </button>
-
-    <div id="timer-display">
-      <div class="timer-badge" id="timer-badge">⏱ Prochaine notif dans <span id="countdown">60</span>s</div>
+    <div class="panel">
+      <div class="panel-title">COMPÉTITION ACTIVE</div>
+      <select class="select-comp" id="compSelect" onchange="loadComp()">
+        <option value="">— Sélectionner —</option>
+      </select>
+      <button class="btn-sm" onclick="fetchCompetitions()">↻ Rafraîchir la liste</button>
     </div>
   </div>
-
-  <div class="log-section">
-    <div class="log-title">// journal des événements</div>
-    <ul id="log"></ul>
-  </div>
-
-  <div class="footer">
-    fonctionne en local &bull; pas de serveur requis &bull; chrome/firefox/edge<br>
-    ferme l'onglet pour arrêter (ou clique sur stopper, t'as le choix)
+  <div class="panel" id="scorePanel">
+    <div class="no-comp">Sélectionne une compétition pour commencer.</div>
   </div>
 </div>
 
+<div class="toast" id="toast"></div>
+
 <script>
-const messages = [
-  "🍕 Arrête ce que tu fais. La pizza refroidit. AGIS.",
-  "👁️ Quelqu'un quelque part pense à toi en ce moment. Bizarre hein.",
-  "🧠 Rappel : tu n'as pas bu d'eau depuis trop longtemps. Hydrate-toi, sac à viande.",
-  "🐧 Un pingouin quelque part te regarde. Il est déçu.",
-  "🔥 Alerte : ton niveau de productivité vient d'atteindre un nouveau creux historique.",
-  "🛸 Les extraterrestres ont observé la Terre. Ils ont décidé de ne pas faire contact. C'est à cause de toi.",
-  "😴 Tu clignotes des yeux un peu trop lentement. Dors ou agis, arrête le flou artistique.",
-  "🧦 Ta chaussette gauche est légèrement plus serrée que la droite. T'y avais pas pensé hein.",
-  "📉 Mise à jour de ton karma : -3 points. Raison : existence générale.",
-  "🐈 Un chat quelque part t'a jugé et trouvé insuffisant.",
-  "☕ Le café froid est une métaphore de ta vie. Réfléchis-y.",
-  "🌍 La Terre a tourné de 1700 km depuis que t'as ouvert cet onglet. T'as rien fait.",
-  "🤖 Je suis une notification. Tu es humain. L'un de nous deux a un but dans la vie.",
-  "🧻 Vérifie le papier toilette avant d'en avoir besoin. C'est gratuit comme conseil.",
-  "💀 Reminder : t'es mortel. Profite. Ou pas. Comme tu veux.",
-];
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxBQNBaa3vgQbtNjb2wVjdbM9mMHcYohuLnTQIMJAJ5el2y2qyT76lcspSPqTLUrAnG/exec";
 
-let timerInterval = null;
-let countdownInterval = null;
-let secondsLeft = 60;
+let state = { comp: null, team1: '', team2: '', score1: 0, score2: 0, faults1: 0, faults2: 0 };
 
-function log(msg, type = '') {
-  const li = document.createElement('li');
-  li.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
-  if (type) li.classList.add(type);
-  const ul = document.getElementById('log');
-  ul.prepend(li);
-}
+// ---- JSONP ----
+let _cbIndex = 0;
+function jsonp(params) {
+  return new Promise((resolve, reject) => {
+    const cbName = '__jsonp_' + (++_cbIndex);
+    const url = new URL(SCRIPT_URL);
+    Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+    url.searchParams.set('callback', cbName);
 
-function setStatus(text, state) {
-  document.getElementById('status-text').textContent = text;
-  const dot = document.getElementById('dot');
-  dot.className = 'dot ' + (state || '');
-}
+    const script = document.createElement('script');
+    const timer = setTimeout(() => {
+      cleanup();
+      reject(new Error('Timeout'));
+    }, 10000);
 
-async function activerNotifs() {
-  if (!('Notification' in window)) {
-    log('Ton navigateur ne supporte pas les notifications. Bravo.', 'err');
-    return;
-  }
+    window[cbName] = (data) => {
+      cleanup();
+      resolve(data);
+    };
 
-  log('Demande de permission en cours...', 'info');
-  const perm = await Notification.requestPermission();
+    function cleanup() {
+      clearTimeout(timer);
+      delete window[cbName];
+      if (script.parentNode) script.parentNode.removeChild(script);
+    }
 
-  if (perm === 'granted') {
-    setStatus('PERMISSION : ACCORDÉE — LE DÉLUGE COMMENCE', 'active');
-    document.getElementById('btn-enable').disabled = true;
-    document.getElementById('btn-test').disabled = false;
-    document.getElementById('btn-stop').disabled = false;
-    log('Permission accordée. Tu l\'as voulu.', 'ok');
-    demarrerTimer();
-    envoyerNotif();
-  } else if (perm === 'denied') {
-    setStatus('PERMISSION : REFUSÉE — LÂCHE', 'denied');
-    log('Refus de permission. Typique.', 'err');
-  } else {
-    log('Permission ignorée. Classique.', 'err');
-  }
-}
-
-function envoyerNotif() {
-  if (Notification.permission !== 'granted') return;
-  const msg = messages[Math.floor(Math.random() * messages.length)];
-  new Notification('Notif Torture 3000', {
-    body: msg,
-    icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🔔</text></svg>'
+    script.onerror = () => { cleanup(); reject(new Error('Erreur réseau')); };
+    script.src = url.toString();
+    document.head.appendChild(script);
   });
-  log(`Notif envoyée : "${msg.slice(0, 50)}..."`, 'ok');
 }
 
-function demarrerTimer() {
-  secondsLeft = 60;
-  document.getElementById('timer-display').style.display = 'block';
-  updateCountdown();
+// ---- Init ----
+window.onload = () => fetchCompetitions();
 
-  countdownInterval = setInterval(() => {
-    secondsLeft--;
-    updateCountdown();
-    if (secondsLeft <= 0) secondsLeft = 60;
-  }, 1000);
-
-  timerInterval = setInterval(() => {
-    envoyerNotif();
-    secondsLeft = 60;
-  }, 60000);
+async function fetchCompetitions() {
+  try {
+    const data = await jsonp({ action: 'getCompetitions' });
+    if (!data || data.error) return;
+    const sel = document.getElementById('compSelect');
+    sel.innerHTML = '<option value="">— Sélectionner —</option>';
+    (data.competitions || []).forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c.name;
+      opt.textContent = c.name;
+      sel.appendChild(opt);
+    });
+  } catch(e) { showToast('Erreur chargement', true); }
 }
 
-function updateCountdown() {
-  document.getElementById('countdown').textContent = secondsLeft;
+async function createCompetition() {
+  const name  = document.getElementById('newCompName').value.trim();
+  const team1 = document.getElementById('newTeam1').value.trim();
+  const team2 = document.getElementById('newTeam2').value.trim();
+  if (!name || !team1 || !team2) { showToast('Remplis tous les champs', true); return; }
+  try {
+    const data = await jsonp({ action: 'newCompetition', name, team1, team2 });
+    if (data?.error) { showToast(data.error, true); return; }
+    showToast('Compétition créée !');
+    document.getElementById('newCompName').value = '';
+    await fetchCompetitions();
+    document.getElementById('compSelect').value = name;
+    loadComp();
+  } catch(e) { showToast('Erreur réseau', true); }
 }
 
-function stopTimer() {
-  clearInterval(timerInterval);
-  clearInterval(countdownInterval);
-  timerInterval = null;
-  document.getElementById('timer-display').style.display = 'none';
-  document.getElementById('btn-stop').disabled = true;
-  setStatus('PERMISSION : ACCORDÉE — TIMER ARRÊTÉ', 'active');
-  log('Timer stoppé. Le silence est d\'or.', 'info');
+async function loadComp() {
+  const comp = document.getElementById('compSelect').value;
+  if (!comp) return;
+  try {
+    const data = await jsonp({ action: 'getScore', comp });
+    if (!data || data.error) { showToast(data?.error || 'Erreur', true); return; }
+    state = { comp, team1: data.team1, team2: data.team2, score1: data.score1, score2: data.score2, faults1: data.faults1, faults2: data.faults2 };
+    renderScorePanel();
+  } catch(e) { showToast('Erreur réseau', true); }
 }
 
-// Vérifie l'état actuel au chargement
-if (Notification.permission === 'granted') {
-  setStatus('PERMISSION DÉJÀ ACCORDÉE — CLIQUE POUR DÉMARRER', 'active');
-  document.getElementById('btn-enable').textContent = '▶ Démarrer le déluge';
-  document.getElementById('btn-test').disabled = false;
+function renderScorePanel() {
+  document.getElementById('scorePanel').innerHTML = `<div class="scoreboard">${renderTeam(1)}${renderTeam(2)}</div>`;
+}
+
+function renderTeam(t) {
+  const name   = state[`team${t}`];
+  const score  = state[`score${t}`];
+  const faults = state[`faults${t}`];
+  const dots   = [1,2,3].map(i => `<div class="dot ${i <= faults ? 'active team'+t : ''}"></div>`).join('');
+  return `
+    <div class="team-block team${t}">
+      <div class="team-name">${name}</div>
+      <div class="score-display">${score}</div>
+      <div class="score-btns">
+        <button class="btn-score btn-plus" onclick="changeScore(${t}, 1)">+</button>
+        <button class="btn-score btn-minus" onclick="changeScore(${t}, -1)">−</button>
+      </div>
+      <div class="faults-label">FAUTES</div>
+      <div class="faults-dots">${dots}</div>
+      <button class="fault-btn" onclick="addFault(${t})">+ Ajouter une faute</button>
+    </div>`;
+}
+
+function changeScore(t, delta) {
+  state[`score${t}`] = Math.max(0, state[`score${t}`] + delta);
+  syncAndRender();
+}
+
+function addFault(t) {
+  state[`faults${t}`]++;
+  if (state[`faults${t}`] >= 3) {
+    const other = t === 1 ? 2 : 1;
+    state[`score${other}`]++;
+    state[`faults${t}`] = 0;
+    showToast(`3 fautes ! +1 point pour ${state['team'+other]}`);
+  }
+  syncAndRender();
+}
+
+async function syncAndRender() {
+  renderScorePanel();
+  if (!state.comp) return;
+  try {
+    await jsonp({
+      action: 'updateScore',
+      comp: state.comp,
+      score1: state.score1,
+      score2: state.score2,
+      faults1: state.faults1,
+      faults2: state.faults2
+    });
+  } catch(e) { showToast('Erreur sync', true); }
+}
+
+let toastTimer;
+function showToast(msg, error = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (error ? ' error' : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.className = 'toast'; }, 2800);
 }
 </script>
 </body>
