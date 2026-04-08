@@ -8,15 +8,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0d0d0d;
-    --surface: #1a1a1a;
-    --border: #2e2e2e;
-    --accent1: #ff4d4d;
-    --accent2: #4daaff;
-    --text: #f0f0f0;
-    --muted: #666;
-    --green: #3ddc84;
-    --yellow: #ffd60a;
+    --bg: #0d0d0d; --surface: #1a1a1a; --border: #2e2e2e;
+    --accent1: #ff4d4d; --accent2: #4daaff; --text: #f0f0f0;
+    --muted: #666; --green: #3ddc84; --yellow: #ffd60a;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: var(--bg); color: var(--text); font-family: 'DM Mono', monospace; min-height: 100vh; padding: 20px; }
@@ -93,49 +87,23 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxBQNBaa3vgQbtNjb2wVjdbM9mMHcYohuLnTQIMJAJ5el2y2qyT76lcspSPqTLUrAnG/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyyG60y6qfsUUBjZjOx_g_NPtObGzsWojziM95MqaXkepQJW3ox0m5nWGFvaeYengH7/exec";
 
 let state = { comp: null, team1: '', team2: '', score1: 0, score2: 0, faults1: 0, faults2: 0 };
 
-// ---- JSONP ----
-let _cbIndex = 0;
-function jsonp(params) {
-  return new Promise((resolve, reject) => {
-    const cbName = '__jsonp_' + (++_cbIndex);
-    const url = new URL(SCRIPT_URL);
-    Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
-    url.searchParams.set('callback', cbName);
-
-    const script = document.createElement('script');
-    const timer = setTimeout(() => {
-      cleanup();
-      reject(new Error('Timeout'));
-    }, 10000);
-
-    window[cbName] = (data) => {
-      cleanup();
-      resolve(data);
-    };
-
-    function cleanup() {
-      clearTimeout(timer);
-      delete window[cbName];
-      if (script.parentNode) script.parentNode.removeChild(script);
-    }
-
-    script.onerror = () => { cleanup(); reject(new Error('Erreur réseau')); };
-    script.src = url.toString();
-    document.head.appendChild(script);
-  });
+async function api(params) {
+  const url = new URL(SCRIPT_URL);
+  Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+  const res = await fetch(url.toString(), { redirect: 'follow' });
+  return res.json();
 }
 
-// ---- Init ----
 window.onload = () => fetchCompetitions();
 
 async function fetchCompetitions() {
   try {
-    const data = await jsonp({ action: 'getCompetitions' });
-    if (!data || data.error) return;
+    const data = await api({ action: 'getCompetitions' });
+    if (!data || data.error) { showToast(data?.error || 'Erreur', true); return; }
     const sel = document.getElementById('compSelect');
     sel.innerHTML = '<option value="">— Sélectionner —</option>';
     (data.competitions || []).forEach(c => {
@@ -144,7 +112,7 @@ async function fetchCompetitions() {
       opt.textContent = c.name;
       sel.appendChild(opt);
     });
-  } catch(e) { showToast('Erreur chargement', true); }
+  } catch(e) { showToast('Erreur réseau : ' + e.message, true); console.error(e); }
 }
 
 async function createCompetition() {
@@ -153,25 +121,25 @@ async function createCompetition() {
   const team2 = document.getElementById('newTeam2').value.trim();
   if (!name || !team1 || !team2) { showToast('Remplis tous les champs', true); return; }
   try {
-    const data = await jsonp({ action: 'newCompetition', name, team1, team2 });
+    const data = await api({ action: 'newCompetition', name, team1, team2 });
     if (data?.error) { showToast(data.error, true); return; }
     showToast('Compétition créée !');
     document.getElementById('newCompName').value = '';
     await fetchCompetitions();
     document.getElementById('compSelect').value = name;
     loadComp();
-  } catch(e) { showToast('Erreur réseau', true); }
+  } catch(e) { showToast('Erreur réseau : ' + e.message, true); console.error(e); }
 }
 
 async function loadComp() {
   const comp = document.getElementById('compSelect').value;
   if (!comp) return;
   try {
-    const data = await jsonp({ action: 'getScore', comp });
+    const data = await api({ action: 'getScore', comp });
     if (!data || data.error) { showToast(data?.error || 'Erreur', true); return; }
     state = { comp, team1: data.team1, team2: data.team2, score1: data.score1, score2: data.score2, faults1: data.faults1, faults2: data.faults2 };
     renderScorePanel();
-  } catch(e) { showToast('Erreur réseau', true); }
+  } catch(e) { showToast('Erreur réseau : ' + e.message, true); console.error(e); }
 }
 
 function renderScorePanel() {
@@ -217,15 +185,8 @@ async function syncAndRender() {
   renderScorePanel();
   if (!state.comp) return;
   try {
-    await jsonp({
-      action: 'updateScore',
-      comp: state.comp,
-      score1: state.score1,
-      score2: state.score2,
-      faults1: state.faults1,
-      faults2: state.faults2
-    });
-  } catch(e) { showToast('Erreur sync', true); }
+    await api({ action: 'updateScore', comp: state.comp, score1: state.score1, score2: state.score2, faults1: state.faults1, faults2: state.faults2 });
+  } catch(e) { showToast('Erreur sync', true); console.error(e); }
 }
 
 let toastTimer;
@@ -234,7 +195,7 @@ function showToast(msg, error = false) {
   t.textContent = msg;
   t.className = 'toast show' + (error ? ' error' : '');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { t.className = 'toast'; }, 2800);
+  toastTimer = setTimeout(() => { t.className = 'toast'; }, 3000);
 }
 </script>
 </body>
