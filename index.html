@@ -10,7 +10,7 @@
   :root {
     --bg: #0d0d0d; --surface: #1a1a1a; --border: #2e2e2e;
     --accent1: #ff4d4d; --accent2: #4daaff; --text: #f0f0f0;
-    --muted: #666; --green: #3ddc84; --yellow: #ffd60a;
+    --muted: #666; --green: #3ddc84; --yellow: #ffd60a; --red: #ff4d4d;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: var(--bg); color: var(--text); font-family: 'DM Mono', monospace; min-height: 100vh; padding: 20px; }
@@ -27,8 +27,19 @@
   .btn-create { width: 100%; background: var(--green); color: #000; border: none; font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; letter-spacing: 2px; padding: 12px; border-radius: 8px; cursor: pointer; margin-top: 6px; }
   .btn-create:hover { opacity: 0.85; }
   .select-comp { width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 0.8rem; padding: 10px 12px; border-radius: 6px; outline: none; margin-bottom: 12px; cursor: pointer; }
-  .btn-sm { background: var(--accent2); color: #000; border: none; font-family: 'DM Mono', monospace; font-weight: 500; font-size: 0.75rem; padding: 8px 14px; border-radius: 6px; cursor: pointer; width: 100%; text-align: center; }
+  .btn-sm { background: var(--accent2); color: #000; border: none; font-family: 'DM Mono', monospace; font-weight: 500; font-size: 0.75rem; padding: 8px 14px; border-radius: 6px; cursor: pointer; width: 100%; text-align: center; margin-bottom: 6px; }
   .btn-sm:hover { opacity: 0.85; }
+  .btn-danger { background: transparent; color: var(--red); border: 1px solid var(--red); font-family: 'DM Mono', monospace; font-size: 0.75rem; padding: 8px 14px; border-radius: 6px; cursor: pointer; width: 100%; text-align: center; margin-bottom: 6px; }
+  .btn-danger:hover { background: rgba(255,77,77,0.1); }
+  .btn-warn { background: transparent; color: var(--yellow); border: 1px solid var(--yellow); font-family: 'DM Mono', monospace; font-size: 0.75rem; padding: 8px 14px; border-radius: 6px; cursor: pointer; width: 100%; text-align: center; margin-bottom: 6px; }
+  .btn-warn:hover { background: rgba(255,214,10,0.08); }
+
+  /* MDP unlock */
+  .lock-bar { display: flex; gap: 8px; margin-bottom: 12px; }
+  .lock-bar input { flex: 1; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 0.8rem; padding: 8px 10px; border-radius: 6px; outline: none; }
+  .lock-bar input:focus { border-color: var(--accent2); }
+  .lock-bar button { background: var(--accent2); color: #000; border: none; font-family: 'DM Mono', monospace; font-size: 0.75rem; padding: 8px 12px; border-radius: 6px; cursor: pointer; white-space: nowrap; }
+
   .scoreboard { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   .team-block { border-radius: 10px; padding: 20px; border: 2px solid transparent; }
   .team-block.team1 { background: rgba(255,77,77,0.06); border-color: rgba(255,77,77,0.2); }
@@ -51,10 +62,28 @@
   .dot.active.team2 { background: var(--accent2); border-color: var(--accent2); }
   .fault-btn { display: block; width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--yellow); font-family: 'DM Mono', monospace; font-size: 0.72rem; cursor: pointer; text-align: center; }
   .fault-btn:hover { background: rgba(255,214,10,0.08); }
+
+  .actions-bar { display: flex; gap: 8px; margin-top: 16px; }
+  .actions-bar button { flex: 1; }
+
+  .sync-indicator { font-size: 0.65rem; color: var(--muted); text-align: right; margin-top: 8px; }
+  .sync-indicator.ok { color: var(--green); }
+
   .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--green); color: #000; font-family: 'DM Mono', monospace; font-size: 0.78rem; padding: 10px 20px; border-radius: 30px; transition: transform 0.3s ease; z-index: 100; }
   .toast.show { transform: translateX(-50%) translateY(0); }
   .toast.error { background: var(--accent1); color: #fff; }
   .no-comp { text-align: center; color: var(--muted); font-size: 0.8rem; padding: 40px 0; }
+
+  /* Modal confirm */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; align-items: center; justify-content: center; }
+  .modal-overlay.show { display: flex; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 28px; max-width: 360px; width: 90%; }
+  .modal h3 { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: 3px; margin-bottom: 10px; }
+  .modal p { font-size: 0.78rem; color: var(--muted); margin-bottom: 20px; }
+  .modal-btns { display: flex; gap: 10px; }
+  .modal-btns button { flex: 1; padding: 10px; border-radius: 8px; border: none; font-family: 'DM Mono', monospace; font-size: 0.8rem; cursor: pointer; }
+  .modal-cancel { background: var(--border); color: var(--text); }
+  .modal-confirm { background: var(--red); color: #fff; }
 </style>
 </head>
 <body>
@@ -66,19 +95,30 @@
   <div>
     <div class="panel" style="margin-bottom:16px">
       <div class="panel-title">NOUVELLE COMPÉTITION</div>
-      <div class="field"><label>NOM DE LA COMPÉTITION</label><input type="text" id="newCompName" placeholder="Ex: Finale Printemps 2025" /></div>
+      <div class="field"><label>NOM</label><input type="text" id="newCompName" placeholder="Finale Printemps 2025" /></div>
       <div class="field"><label>ÉQUIPE 1</label><input type="text" id="newTeam1" placeholder="Les Illuminés" /></div>
       <div class="field"><label>ÉQUIPE 2</label><input type="text" id="newTeam2" placeholder="Les Farceurs" /></div>
+      <div class="field"><label>MOT DE PASSE (optionnel)</label><input type="password" id="newPassword" placeholder="Laisser vide = sans mdp" /></div>
       <button class="btn-create" onclick="createCompetition()">+ CRÉER</button>
     </div>
+
     <div class="panel">
       <div class="panel-title">COMPÉTITION ACTIVE</div>
-      <select class="select-comp" id="compSelect" onchange="loadComp()">
+      <select class="select-comp" id="compSelect" onchange="onCompChange()">
         <option value="">— Sélectionner —</option>
       </select>
+
+      <div class="lock-bar" id="lockBar" style="display:none">
+        <input type="password" id="passwordInput" placeholder="Mot de passe…" />
+        <button onclick="unlockComp()">OK</button>
+      </div>
+
       <button class="btn-sm" onclick="fetchCompetitions()">↻ Rafraîchir la liste</button>
+      <button class="btn-warn" id="btnReset" onclick="confirmAction('reset')" style="display:none">⟳ Réinitialiser les scores</button>
+      <button class="btn-danger" id="btnDelete" onclick="confirmAction('delete')" style="display:none">✕ Supprimer la compétition</button>
     </div>
   </div>
+
   <div class="panel" id="scorePanel">
     <div class="no-comp">Sélectionne une compétition pour commencer.</div>
   </div>
@@ -86,10 +126,25 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- Modal confirmation -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h3 id="modalTitle">CONFIRMER</h3>
+    <p id="modalText">Êtes-vous sûr ?</p>
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="closeModal()">Annuler</button>
+      <button class="modal-confirm" id="modalConfirmBtn">Confirmer</button>
+    </div>
+  </div>
+</div>
+
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyyG60y6qfsUUBjZjOx_g_NPtObGzsWojziM95MqaXkepQJW3ox0m5nWGFvaeYengH7/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw2Akle07xeT8oUSb9oQLymQGz39-CR10o8wSRbVjYG5f2FH1hmUMfNnHJWU_trJOvE/exec";
 
 let state = { comp: null, team1: '', team2: '', score1: 0, score2: 0, faults1: 0, faults2: 0 };
+let currentPassword = '';
+let compHasPassword = false;
+let unlocked = false;
 
 async function api(params) {
   const url = new URL(SCRIPT_URL);
@@ -103,32 +158,40 @@ window.onload = () => fetchCompetitions();
 async function fetchCompetitions() {
   try {
     const data = await api({ action: 'getCompetitions' });
-    if (!data || data.error) { showToast(data?.error || 'Erreur', true); return; }
+    if (!data || data.error) return;
     const sel = document.getElementById('compSelect');
+    const prev = sel.value;
     sel.innerHTML = '<option value="">— Sélectionner —</option>';
     (data.competitions || []).forEach(c => {
       const opt = document.createElement('option');
       opt.value = c.name;
-      opt.textContent = c.name;
+      opt.textContent = c.name + (c.hasPassword ? ' 🔒' : '');
+      opt.dataset.hasPassword = c.hasPassword ? '1' : '0';
       sel.appendChild(opt);
     });
-  } catch(e) { showToast('Erreur réseau : ' + e.message, true); console.error(e); }
+    if (prev) sel.value = prev;
+  } catch(e) { showToast('Erreur réseau', true); }
 }
 
-async function createCompetition() {
-  const name  = document.getElementById('newCompName').value.trim();
-  const team1 = document.getElementById('newTeam1').value.trim();
-  const team2 = document.getElementById('newTeam2').value.trim();
-  if (!name || !team1 || !team2) { showToast('Remplis tous les champs', true); return; }
-  try {
-    const data = await api({ action: 'newCompetition', name, team1, team2 });
-    if (data?.error) { showToast(data.error, true); return; }
-    showToast('Compétition créée !');
-    document.getElementById('newCompName').value = '';
-    await fetchCompetitions();
-    document.getElementById('compSelect').value = name;
-    loadComp();
-  } catch(e) { showToast('Erreur réseau : ' + e.message, true); console.error(e); }
+function onCompChange() {
+  const sel = document.getElementById('compSelect');
+  const opt = sel.options[sel.selectedIndex];
+  compHasPassword = opt?.dataset.hasPassword === '1';
+  currentPassword = '';
+  unlocked = !compHasPassword;
+
+  document.getElementById('lockBar').style.display = compHasPassword ? 'flex' : 'none';
+  document.getElementById('passwordInput').value = '';
+  document.getElementById('btnReset').style.display = 'none';
+  document.getElementById('btnDelete').style.display = 'none';
+  document.getElementById('scorePanel').innerHTML = '<div class="no-comp">Sélectionne une compétition pour commencer.</div>';
+
+  if (!compHasPassword && sel.value) loadComp();
+}
+
+async function unlockComp() {
+  currentPassword = document.getElementById('passwordInput').value;
+  await loadComp();
 }
 
 async function loadComp() {
@@ -138,8 +201,12 @@ async function loadComp() {
     const data = await api({ action: 'getScore', comp });
     if (!data || data.error) { showToast(data?.error || 'Erreur', true); return; }
     state = { comp, team1: data.team1, team2: data.team2, score1: data.score1, score2: data.score2, faults1: data.faults1, faults2: data.faults2 };
+    unlocked = true;
+    document.getElementById('lockBar').style.display = 'none';
+    document.getElementById('btnReset').style.display = 'block';
+    document.getElementById('btnDelete').style.display = 'block';
     renderScorePanel();
-  } catch(e) { showToast('Erreur réseau : ' + e.message, true); console.error(e); }
+  } catch(e) { showToast('Erreur réseau', true); }
 }
 
 function renderScorePanel() {
@@ -185,9 +252,54 @@ async function syncAndRender() {
   renderScorePanel();
   if (!state.comp) return;
   try {
-    await api({ action: 'updateScore', comp: state.comp, score1: state.score1, score2: state.score2, faults1: state.faults1, faults2: state.faults2 });
-  } catch(e) { showToast('Erreur sync', true); console.error(e); }
+    const data = await api({
+      action: 'updateScore', comp: state.comp, password: currentPassword,
+      score1: state.score1, score2: state.score2, faults1: state.faults1, faults2: state.faults2
+    });
+    if (data?.error) showToast(data.error, true);
+  } catch(e) { showToast('Erreur sync', true); }
 }
+
+// ---- Reset / Delete ----
+
+let pendingAction = null;
+
+function confirmAction(action) {
+  pendingAction = action;
+  const isDelete = action === 'delete';
+  document.getElementById('modalTitle').textContent = isDelete ? 'SUPPRIMER ?' : 'RÉINITIALISER ?';
+  document.getElementById('modalText').textContent = isDelete
+    ? `Supprimer définitivement "${state.comp}" et toutes ses données ?`
+    : `Remettre les scores de "${state.comp}" à zéro ?`;
+  document.getElementById('modalConfirmBtn').textContent = isDelete ? 'Supprimer' : 'Réinitialiser';
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('show');
+  pendingAction = null;
+}
+
+document.getElementById('modalConfirmBtn').onclick = async () => {
+  closeModal();
+  if (!pendingAction || !state.comp) return;
+  try {
+    const data = await api({ action: pendingAction === 'delete' ? 'deleteComp' : 'resetComp', comp: state.comp, password: currentPassword });
+    if (data?.error) { showToast(data.error, true); return; }
+    showToast(pendingAction === 'delete' ? 'Compétition supprimée' : 'Scores remis à zéro');
+    if (pendingAction === 'delete') {
+      state = { comp: null, team1: '', team2: '', score1: 0, score2: 0, faults1: 0, faults2: 0 };
+      document.getElementById('compSelect').value = '';
+      document.getElementById('scorePanel').innerHTML = '<div class="no-comp">Sélectionne une compétition pour commencer.</div>';
+      document.getElementById('btnReset').style.display = 'none';
+      document.getElementById('btnDelete').style.display = 'none';
+      await fetchCompetitions();
+    } else {
+      state.score1 = 0; state.score2 = 0; state.faults1 = 0; state.faults2 = 0;
+      renderScorePanel();
+    }
+  } catch(e) { showToast('Erreur réseau', true); }
+};
 
 let toastTimer;
 function showToast(msg, error = false) {
@@ -196,6 +308,28 @@ function showToast(msg, error = false) {
   t.className = 'toast show' + (error ? ' error' : '');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => { t.className = 'toast'; }, 3000);
+}
+
+async function createCompetition() {
+  const name     = document.getElementById('newCompName').value.trim();
+  const team1    = document.getElementById('newTeam1').value.trim();
+  const team2    = document.getElementById('newTeam2').value.trim();
+  const password = document.getElementById('newPassword').value.trim();
+  if (!name || !team1 || !team2) { showToast('Remplis tous les champs', true); return; }
+  try {
+    const data = await api({ action: 'newCompetition', name, team1, team2, password });
+    if (data?.error) { showToast(data.error, true); return; }
+    showToast('Compétition créée !');
+    document.getElementById('newCompName').value = '';
+    document.getElementById('newTeam1').value = '';
+    document.getElementById('newTeam2').value = '';
+    document.getElementById('newPassword').value = '';
+    await fetchCompetitions();
+    document.getElementById('compSelect').value = name;
+    currentPassword = password;
+    onCompChange();
+    if (!password) loadComp();
+  } catch(e) { showToast('Erreur réseau', true); }
 }
 </script>
 </body>
