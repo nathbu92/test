@@ -33,7 +33,7 @@
   .score-num { font-family: 'Bebas Neue', sans-serif; font-size: clamp(6rem, 18vw, 14rem); line-height: 0.9; text-align: center; transition: transform 0.15s ease; }
   .team-side.left .score-num { color: var(--accent1); }
   .team-side.right .score-num { color: var(--accent2); }
-  .score-num.bump { transform: scale(1.12); }
+  .score-num.bump { transform: scale(1.15); }
   .faults-row { display: flex; gap: 10px; align-items: center; }
   .fault-dot { width: clamp(14px, 2.5vw, 22px); height: clamp(14px, 2.5vw, 22px); border-radius: 50%; border: 2px solid #333; transition: background 0.2s; }
   .fault-dot.active.left { background: var(--accent1); border-color: var(--accent1); }
@@ -41,9 +41,9 @@
   .faults-label-txt { font-size: clamp(0.5rem, 1.5vw, 0.72rem); color: var(--muted); letter-spacing: 2px; }
   .divider { display: flex; align-items: center; justify-content: center; color: var(--muted); font-family: 'Bebas Neue', sans-serif; font-size: 2rem; }
   .bottom-bar { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 12px 20px 20px; color: var(--muted); font-size: 0.68rem; letter-spacing: 1px; }
-  .pulse-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); animation: pulse 2s infinite; }
+  .pulse-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); animation: pulse 1s infinite; }
   .pulse-dot.live { background: var(--yellow); }
-  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
 </style>
 </head>
 <body>
@@ -91,11 +91,13 @@
 </div>
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyyG60y6qfsUUBjZjOx_g_NPtObGzsWojziM95MqaXkepQJW3ox0m5nWGFvaeYengH7/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw2Akle07xeT8oUSb9oQLymQGz39-CR10o8wSRbVjYG5f2FH1hmUMfNnHJWU_trJOvE/exec";
+const POLL_INTERVAL = 1000; // 1 seconde
 
 let currentComp = '';
 let pollInterval = null;
 let prevState = {};
+let isFetching = false;
 
 async function api(params) {
   const url = new URL(SCRIPT_URL);
@@ -115,7 +117,7 @@ async function fetchCompetitions() {
     (data.competitions || []).forEach(c => {
       const opt = document.createElement('option');
       opt.value = c.name;
-      opt.textContent = c.name;
+      opt.textContent = c.name + (c.hasPassword ? ' 🔒' : '');
       sel.appendChild(opt);
     });
     document.getElementById('launchBtn').disabled = true;
@@ -139,7 +141,9 @@ function goBack() {
 
 function startPolling() {
   fetchAndRender();
-  pollInterval = setInterval(fetchAndRender, 3000);
+  pollInterval = setInterval(() => {
+    if (!isFetching) fetchAndRender();
+  }, POLL_INTERVAL);
   document.getElementById('pulseDot').classList.add('live');
 }
 
@@ -149,21 +153,31 @@ function stopPolling() {
 }
 
 async function fetchAndRender() {
+  isFetching = true;
   try {
     const data = await api({ action: 'getScore', comp: currentComp });
     if (!data || data.error) return;
+
     const s1Changed = data.score1 !== prevState.score1;
     const s2Changed = data.score2 !== prevState.score2;
+
     document.getElementById('team1Name').textContent = data.team1;
     document.getElementById('team2Name').textContent = data.team2;
     updateScore('score1', data.score1, s1Changed);
     updateScore('score2', data.score2, s2Changed);
     updateFaults(1, data.faults1);
     updateFaults(2, data.faults2);
+
     const d = new Date(data.lastUpdate);
-    document.getElementById('lastUpdate').textContent = 'Sync ' + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    document.getElementById('lastUpdate').textContent =
+      'Sync ' + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
     prevState = { ...data };
-  } catch(e) { console.error(e); }
+  } catch(e) {
+    console.error(e);
+  } finally {
+    isFetching = false;
+  }
 }
 
 function updateScore(id, value, changed) {
