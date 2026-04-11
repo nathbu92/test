@@ -11,11 +11,29 @@
     --bg: #0d0d0d; --surface: #1a1a1a; --border: #2e2e2e;
     --accent1: #ff4d4d; --accent2: #4daaff; --text: #f0f0f0;
     --muted: #666; --green: #3ddc84; --yellow: #ffd60a; --red: #ff4d4d;
+    --orange: #ff8c00;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: var(--bg); color: var(--text); font-family: 'DM Mono', monospace; min-height: 100vh; padding: 20px; }
-  h1 { font-family: 'Bebas Neue', sans-serif; font-size: 2.4rem; letter-spacing: 4px; margin-bottom: 4px; }
-  .subtitle { color: var(--muted); font-size: 0.75rem; margin-bottom: 30px; }
+
+  /* Header */
+  .header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 4px; flex-wrap: wrap; gap: 10px; }
+  h1 { font-family: 'Bebas Neue', sans-serif; font-size: 2.4rem; letter-spacing: 4px; }
+  .subtitle { color: var(--muted); font-size: 0.75rem; margin-bottom: 20px; }
+
+  /* Mode toggle */
+  .mode-toggle { display: flex; gap: 0; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+  .mode-btn { padding: 8px 18px; font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 2px; border: none; cursor: pointer; transition: background 0.15s, color 0.15s; }
+  .mode-btn.local  { background: var(--surface); color: var(--muted); }
+  .mode-btn.sheet  { background: var(--surface); color: var(--muted); }
+  .mode-btn.active.local { background: var(--orange); color: #000; }
+  .mode-btn.active.sheet { background: var(--accent2); color: #000; }
+
+  .mode-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 0.65rem; padding: 4px 10px; border-radius: 20px; margin-bottom: 20px; }
+  .mode-badge.local { background: rgba(255,140,0,0.15); color: var(--orange); border: 1px solid rgba(255,140,0,0.3); }
+  .mode-badge.sheet { background: rgba(77,170,255,0.1); color: var(--accent2); border: 1px solid rgba(77,170,255,0.2); }
+  .mode-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
   .panels { display: grid; grid-template-columns: 300px 1fr; gap: 20px; }
   @media (max-width: 700px) { .panels { grid-template-columns: 1fr; } }
   .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
@@ -24,21 +42,21 @@
   .field label { display: block; font-size: 0.7rem; color: var(--muted); margin-bottom: 4px; }
   .field input { width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 0.85rem; padding: 10px 12px; border-radius: 6px; outline: none; }
   .field input:focus { border-color: var(--accent2); }
-  .btn-create { width: 100%; background: var(--green); color: #000; border: none; font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; letter-spacing: 2px; padding: 12px; border-radius: 8px; cursor: pointer; margin-top: 6px; }
+
+  .btn-create { width: 100%; background: var(--green); color: #000; border: none; font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; letter-spacing: 2px; padding: 12px; border-radius: 8px; cursor: pointer; margin-top: 6px; position: relative; }
   .btn-create:hover { opacity: 0.85; }
+  .btn-create:disabled { opacity: 0.5; cursor: not-allowed; }
+
   .select-comp { width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 0.8rem; padding: 10px 12px; border-radius: 6px; outline: none; margin-bottom: 12px; cursor: pointer; }
-  .btn-sm { background: var(--accent2); color: #000; border: none; font-family: 'DM Mono', monospace; font-weight: 500; font-size: 0.75rem; padding: 8px 14px; border-radius: 6px; cursor: pointer; width: 100%; text-align: center; margin-bottom: 6px; }
+  .btn-sm { background: var(--accent2); color: #000; border: none; font-family: 'DM Mono', monospace; font-weight: 500; font-size: 0.75rem; padding: 8px 14px; border-radius: 6px; cursor: pointer; width: 100%; text-align: center; margin-bottom: 6px; position: relative; }
   .btn-sm:hover { opacity: 0.85; }
+  .btn-sm:disabled { opacity: 0.5; cursor: not-allowed; }
   .btn-danger { background: transparent; color: var(--red); border: 1px solid var(--red); font-family: 'DM Mono', monospace; font-size: 0.75rem; padding: 8px 14px; border-radius: 6px; cursor: pointer; width: 100%; text-align: center; margin-bottom: 6px; }
   .btn-danger:hover { background: rgba(255,77,77,0.1); }
+  .btn-danger:disabled { opacity: 0.5; cursor: not-allowed; }
   .btn-warn { background: transparent; color: var(--yellow); border: 1px solid var(--yellow); font-family: 'DM Mono', monospace; font-size: 0.75rem; padding: 8px 14px; border-radius: 6px; cursor: pointer; width: 100%; text-align: center; margin-bottom: 6px; }
   .btn-warn:hover { background: rgba(255,214,10,0.08); }
-
-  /* MDP unlock */
-  .lock-bar { display: flex; gap: 8px; margin-bottom: 12px; }
-  .lock-bar input { flex: 1; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 0.8rem; padding: 8px 10px; border-radius: 6px; outline: none; }
-  .lock-bar input:focus { border-color: var(--accent2); }
-  .lock-bar button { background: var(--accent2); color: #000; border: none; font-family: 'DM Mono', monospace; font-size: 0.75rem; padding: 8px 12px; border-radius: 6px; cursor: pointer; white-space: nowrap; }
+  .btn-warn:disabled { opacity: 0.5; cursor: not-allowed; }
 
   .scoreboard { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   .team-block { border-radius: 10px; padding: 20px; border: 2px solid transparent; }
@@ -51,8 +69,9 @@
   .team-block.team1 .score-display { color: var(--accent1); }
   .team-block.team2 .score-display { color: var(--accent2); }
   .score-btns { display: flex; gap: 8px; justify-content: center; margin-bottom: 20px; }
-  .btn-score { width: 52px; height: 52px; border: none; border-radius: 8px; font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; cursor: pointer; transition: transform 0.1s; }
+  .btn-score { width: 52px; height: 52px; border: none; border-radius: 8px; font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; cursor: pointer; transition: transform 0.1s, opacity 0.15s; position: relative; }
   .btn-score:active { transform: scale(0.93); }
+  .btn-score:disabled { opacity: 0.4; cursor: not-allowed; }
   .btn-plus { background: var(--green); color: #000; }
   .btn-minus { background: var(--border); color: var(--text); }
   .faults-label { font-size: 0.65rem; color: var(--muted); text-align: center; margin-bottom: 8px; letter-spacing: 2px; }
@@ -62,19 +81,30 @@
   .dot.active.team2 { background: var(--accent2); border-color: var(--accent2); }
   .fault-btn { display: block; width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--yellow); font-family: 'DM Mono', monospace; font-size: 0.72rem; cursor: pointer; text-align: center; }
   .fault-btn:hover { background: rgba(255,214,10,0.08); }
+  .fault-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-  .actions-bar { display: flex; gap: 8px; margin-top: 16px; }
-  .actions-bar button { flex: 1; }
+  /* Spinner inline */
+  .spinner { display: none; width: 14px; height: 14px; border: 2px solid rgba(0,0,0,0.3); border-top-color: #000; border-radius: 50%; animation: spin 0.6s linear infinite; vertical-align: middle; margin-left: 6px; }
+  .spinner.white { border-color: rgba(255,255,255,0.3); border-top-color: #fff; }
+  .spinner.show { display: inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
-  .sync-indicator { font-size: 0.65rem; color: var(--muted); text-align: right; margin-top: 8px; }
-  .sync-indicator.ok { color: var(--green); }
+  /* Sync bar */
+  .sync-bar { display: flex; align-items: center; gap: 8px; font-size: 0.65rem; color: var(--muted); margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+  .sync-bar .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); flex-shrink: 0; }
+  .sync-bar.syncing .sync-dot { background: var(--yellow); animation: pulse 0.8s infinite; }
+  .sync-bar.synced .sync-dot { background: var(--green); }
+  .sync-bar.error .sync-dot { background: var(--red); }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
+  .no-comp { text-align: center; color: var(--muted); font-size: 0.8rem; padding: 40px 0; }
+
+  /* Toast */
   .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--green); color: #000; font-family: 'DM Mono', monospace; font-size: 0.78rem; padding: 10px 20px; border-radius: 30px; transition: transform 0.3s ease; z-index: 100; }
   .toast.show { transform: translateX(-50%) translateY(0); }
   .toast.error { background: var(--accent1); color: #fff; }
-  .no-comp { text-align: center; color: var(--muted); font-size: 0.8rem; padding: 40px 0; }
 
-  /* Modal confirm */
+  /* Modal */
   .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; align-items: center; justify-content: center; }
   .modal-overlay.show { display: flex; }
   .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 28px; max-width: 360px; width: 90%; }
@@ -88,8 +118,17 @@
 </head>
 <body>
 
-<h1>IMPRO ADMIN</h1>
-<p class="subtitle">Panneau de contrôle des scores</p>
+<div class="header">
+  <h1>IMPRO ADMIN</h1>
+  <div class="mode-toggle">
+    <button class="mode-btn local" id="btnLocal" onclick="setMode('local')">⚡ LOCAL</button>
+    <button class="mode-btn sheet" id="btnSheet" onclick="setMode('sheet')">☁ SHEET</button>
+  </div>
+</div>
+<div class="mode-badge" id="modeBadge">
+  <span class="dot"></span>
+  <span id="modeLabel">—</span>
+</div>
 
 <div class="panels">
   <div>
@@ -98,24 +137,20 @@
       <div class="field"><label>NOM</label><input type="text" id="newCompName" placeholder="Finale Printemps 2025" /></div>
       <div class="field"><label>ÉQUIPE 1</label><input type="text" id="newTeam1" placeholder="Les Illuminés" /></div>
       <div class="field"><label>ÉQUIPE 2</label><input type="text" id="newTeam2" placeholder="Les Farceurs" /></div>
-      <div class="field"><label>MOT DE PASSE (optionnel)</label><input type="password" id="newPassword" placeholder="Laisser vide = sans mdp" /></div>
-      <button class="btn-create" onclick="createCompetition()">+ CRÉER</button>
+      <button class="btn-create" id="btnCreate" onclick="createCompetition()">
+        + CRÉER <span class="spinner" id="spinCreate"></span>
+      </button>
     </div>
-
     <div class="panel">
       <div class="panel-title">COMPÉTITION ACTIVE</div>
-      <select class="select-comp" id="compSelect" onchange="onCompChange()">
+      <select class="select-comp" id="compSelect" onchange="loadComp()">
         <option value="">— Sélectionner —</option>
       </select>
-
-      <div class="lock-bar" id="lockBar" style="display:none">
-        <input type="password" id="passwordInput" placeholder="Mot de passe…" />
-        <button onclick="unlockComp()">OK</button>
-      </div>
-
-      <button class="btn-sm" onclick="fetchCompetitions()">↻ Rafraîchir la liste</button>
-      <button class="btn-warn" id="btnReset" onclick="confirmAction('reset')" style="display:none">⟳ Réinitialiser les scores</button>
-      <button class="btn-danger" id="btnDelete" onclick="confirmAction('delete')" style="display:none">✕ Supprimer la compétition</button>
+      <button class="btn-sm" id="btnRefresh" onclick="fetchCompetitions()">
+        ↻ Rafraîchir <span class="spinner" id="spinRefresh"></span>
+      </button>
+      <button class="btn-warn" id="btnReset" onclick="confirmAction('reset')" style="display:none">⟳ Réinitialiser</button>
+      <button class="btn-danger" id="btnDelete" onclick="confirmAction('delete')" style="display:none">✕ Supprimer</button>
     </div>
   </div>
 
@@ -126,11 +161,10 @@
 
 <div class="toast" id="toast"></div>
 
-<!-- Modal confirmation -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
     <h3 id="modalTitle">CONFIRMER</h3>
-    <p id="modalText">Êtes-vous sûr ?</p>
+    <p id="modalText"></p>
     <div class="modal-btns">
       <button class="modal-cancel" onclick="closeModal()">Annuler</button>
       <button class="modal-confirm" id="modalConfirmBtn">Confirmer</button>
@@ -139,25 +173,152 @@
 </div>
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw2Akle07xeT8oUSb9oQLymQGz39-CR10o8wSRbVjYG5f2FH1hmUMfNnHJWU_trJOvE/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzpOS-zHRPZJE9551YPivGgDdo91IEB4l_kBdFn-dwbw-fQ_fXCfIdNKjDipnmpjR5o/exec";
+const LS_STATE_KEY   = 'impro_local_state';
+const LS_COMPLIST_KEY = 'impro_local_complist';
 
+let mode  = localStorage.getItem('impro_mode') || 'sheet'; // 'local' | 'sheet'
 let state = { comp: null, team1: '', team2: '', score1: 0, score2: 0, faults1: 0, faults2: 0 };
-let currentPassword = '';
-let compHasPassword = false;
-let unlocked = false;
+let isSyncing = false;
 
-async function api(params) {
+// ============================================================
+// MODE
+// ============================================================
+function setMode(m) {
+  mode = m;
+  localStorage.setItem('impro_mode', m);
+  updateModeUI();
+  // Reset et recharge
+  state = { comp: null, team1: '', team2: '', score1: 0, score2: 0, faults1: 0, faults2: 0 };
+  document.getElementById('compSelect').value = '';
+  document.getElementById('scorePanel').innerHTML = '<div class="no-comp">Sélectionne une compétition pour commencer.</div>';
+  document.getElementById('btnReset').style.display = 'none';
+  document.getElementById('btnDelete').style.display = 'none';
+  fetchCompetitions();
+}
+
+function updateModeUI() {
+  document.getElementById('btnLocal').classList.toggle('active', mode === 'local');
+  document.getElementById('btnSheet').classList.toggle('active', mode === 'sheet');
+  const badge = document.getElementById('modeBadge');
+  badge.className = 'mode-badge ' + mode;
+  document.getElementById('modeLabel').textContent = mode === 'local'
+    ? 'Mode LOCAL — stockage instantané sur cet appareil'
+    : 'Mode SHEET — synchronisation Google Sheets';
+}
+
+// ============================================================
+// API SHEET
+// ============================================================
+async function apiSheet(params) {
   const url = new URL(SCRIPT_URL);
   Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
   const res = await fetch(url.toString(), { redirect: 'follow' });
   return res.json();
 }
 
-window.onload = () => fetchCompetitions();
+// ============================================================
+// API LOCAL (localStorage)
+// ============================================================
+function localGetCompetitions() {
+  const list = JSON.parse(localStorage.getItem(LS_COMPLIST_KEY) || '[]');
+  return { competitions: [...list].reverse() };
+}
+
+function localCreateCompetition(name, team1, team2) {
+  const list = JSON.parse(localStorage.getItem(LS_COMPLIST_KEY) || '[]');
+  if (list.find(c => c.name === name)) return { error: 'Compétition déjà existante' };
+  const now = new Date().toISOString();
+  list.push({ name, team1, team2, created: now });
+  localStorage.setItem(LS_COMPLIST_KEY, JSON.stringify(list));
+  // Init le score
+  const scores = JSON.parse(localStorage.getItem(LS_STATE_KEY) || '{}');
+  scores[name] = { team1, team2, score1: 0, score2: 0, faults1: 0, faults2: 0, lastUpdate: now };
+  localStorage.setItem(LS_STATE_KEY, JSON.stringify(scores));
+  return { success: true, comp: name };
+}
+
+function localGetScore(compName) {
+  const scores = JSON.parse(localStorage.getItem(LS_STATE_KEY) || '{}');
+  if (!scores[compName]) return { error: 'Compétition introuvable' };
+  return scores[compName];
+}
+
+function localUpdateScore(compName, score1, score2, faults1, faults2) {
+  const scores = JSON.parse(localStorage.getItem(LS_STATE_KEY) || '{}');
+  if (!scores[compName]) return { error: 'Compétition introuvable' };
+  scores[compName] = { ...scores[compName], score1, score2, faults1, faults2, lastUpdate: new Date().toISOString() };
+  localStorage.setItem(LS_STATE_KEY, JSON.stringify(scores));
+  return { success: true };
+}
+
+function localResetComp(compName) {
+  const scores = JSON.parse(localStorage.getItem(LS_STATE_KEY) || '{}');
+  if (!scores[compName]) return { error: 'Compétition introuvable' };
+  scores[compName] = { ...scores[compName], score1: 0, score2: 0, faults1: 0, faults2: 0, lastUpdate: new Date().toISOString() };
+  localStorage.setItem(LS_STATE_KEY, JSON.stringify(scores));
+  return { success: true };
+}
+
+function localDeleteComp(compName) {
+  let list = JSON.parse(localStorage.getItem(LS_COMPLIST_KEY) || '[]');
+  list = list.filter(c => c.name !== compName);
+  localStorage.setItem(LS_COMPLIST_KEY, JSON.stringify(list));
+  const scores = JSON.parse(localStorage.getItem(LS_STATE_KEY) || '{}');
+  delete scores[compName];
+  localStorage.setItem(LS_STATE_KEY, JSON.stringify(scores));
+  return { success: true };
+}
+
+// ============================================================
+// DISPATCH (choisit local ou sheet)
+// ============================================================
+async function doAction(params) {
+  if (mode === 'local') {
+    // Synchrone pour le local
+    const { action } = params;
+    if (action === 'getCompetitions')  return localGetCompetitions();
+    if (action === 'getScore')         return localGetScore(params.comp);
+    if (action === 'newCompetition')   return localCreateCompetition(params.name, params.team1, params.team2);
+    if (action === 'updateScore')      return localUpdateScore(params.comp, params.score1, params.score2, params.faults1, params.faults2);
+    if (action === 'resetComp')        return localResetComp(params.comp);
+    if (action === 'deleteComp')       return localDeleteComp(params.comp);
+  } else {
+    return apiSheet(params);
+  }
+}
+
+// ============================================================
+// SPINNERS / LOCK
+// ============================================================
+function spin(id, on) {
+  document.getElementById(id)?.classList.toggle('show', on);
+}
+
+function lockButtons(on) {
+  ['btnCreate','btnRefresh','btnReset','btnDelete'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.disabled = on;
+  });
+  document.querySelectorAll('.btn-score, .fault-btn').forEach(el => el.disabled = on);
+}
+
+function setSyncBar(status, text) {
+  const bar = document.getElementById('syncBar');
+  if (!bar) return;
+  bar.className = 'sync-bar ' + status;
+  document.getElementById('syncText').textContent = text;
+}
+
+// ============================================================
+// COMPÉTITIONS
+// ============================================================
+window.onload = () => { updateModeUI(); fetchCompetitions(); };
 
 async function fetchCompetitions() {
+  spin('spinRefresh', true);
   try {
-    const data = await api({ action: 'getCompetitions' });
+    const data = await doAction({ action: 'getCompetitions' });
     if (!data || data.error) return;
     const sel = document.getElementById('compSelect');
     const prev = sel.value;
@@ -165,52 +326,58 @@ async function fetchCompetitions() {
     (data.competitions || []).forEach(c => {
       const opt = document.createElement('option');
       opt.value = c.name;
-      opt.textContent = c.name + (c.hasPassword ? ' 🔒' : '');
-      opt.dataset.hasPassword = c.hasPassword ? '1' : '0';
+      opt.textContent = c.name;
       sel.appendChild(opt);
     });
     if (prev) sel.value = prev;
   } catch(e) { showToast('Erreur réseau', true); }
+  finally { spin('spinRefresh', false); }
 }
 
-function onCompChange() {
-  const sel = document.getElementById('compSelect');
-  const opt = sel.options[sel.selectedIndex];
-  compHasPassword = opt?.dataset.hasPassword === '1';
-  currentPassword = '';
-  unlocked = !compHasPassword;
-
-  document.getElementById('lockBar').style.display = compHasPassword ? 'flex' : 'none';
-  document.getElementById('passwordInput').value = '';
-  document.getElementById('btnReset').style.display = 'none';
-  document.getElementById('btnDelete').style.display = 'none';
-  document.getElementById('scorePanel').innerHTML = '<div class="no-comp">Sélectionne une compétition pour commencer.</div>';
-
-  if (!compHasPassword && sel.value) loadComp();
-}
-
-async function unlockComp() {
-  currentPassword = document.getElementById('passwordInput').value;
-  await loadComp();
+async function createCompetition() {
+  const name  = document.getElementById('newCompName').value.trim();
+  const team1 = document.getElementById('newTeam1').value.trim();
+  const team2 = document.getElementById('newTeam2').value.trim();
+  if (!name || !team1 || !team2) { showToast('Remplis tous les champs', true); return; }
+  spin('spinCreate', true);
+  document.getElementById('btnCreate').disabled = true;
+  try {
+    const data = await doAction({ action: 'newCompetition', name, team1, team2 });
+    if (data?.error) { showToast(data.error, true); return; }
+    showToast('Compétition créée !');
+    document.getElementById('newCompName').value = '';
+    document.getElementById('newTeam1').value = '';
+    document.getElementById('newTeam2').value = '';
+    await fetchCompetitions();
+    document.getElementById('compSelect').value = name;
+    await loadComp();
+  } catch(e) { showToast('Erreur réseau', true); }
+  finally { spin('spinCreate', false); document.getElementById('btnCreate').disabled = false; }
 }
 
 async function loadComp() {
   const comp = document.getElementById('compSelect').value;
   if (!comp) return;
   try {
-    const data = await api({ action: 'getScore', comp });
+    const data = await doAction({ action: 'getScore', comp });
     if (!data || data.error) { showToast(data?.error || 'Erreur', true); return; }
     state = { comp, team1: data.team1, team2: data.team2, score1: data.score1, score2: data.score2, faults1: data.faults1, faults2: data.faults2 };
-    unlocked = true;
-    document.getElementById('lockBar').style.display = 'none';
     document.getElementById('btnReset').style.display = 'block';
     document.getElementById('btnDelete').style.display = 'block';
     renderScorePanel();
   } catch(e) { showToast('Erreur réseau', true); }
 }
 
+// ============================================================
+// SCORE PANEL
+// ============================================================
 function renderScorePanel() {
-  document.getElementById('scorePanel').innerHTML = `<div class="scoreboard">${renderTeam(1)}${renderTeam(2)}</div>`;
+  document.getElementById('scorePanel').innerHTML = `
+    <div class="scoreboard">${renderTeam(1)}${renderTeam(2)}</div>
+    <div class="sync-bar" id="syncBar">
+      <span class="sync-dot"></span>
+      <span id="syncText">En attente…</span>
+    </div>`;
 }
 
 function renderTeam(t) {
@@ -243,7 +410,7 @@ function addFault(t) {
     const other = t === 1 ? 2 : 1;
     state[`score${other}`]++;
     state[`faults${t}`] = 0;
-    showToast(`3 fautes ! +1 point pour ${state['team'+other]}`);
+    showToast(`3 fautes ! +1 pt pour ${state['team'+other]}`);
   }
   syncAndRender();
 }
@@ -251,25 +418,39 @@ function addFault(t) {
 async function syncAndRender() {
   renderScorePanel();
   if (!state.comp) return;
+  setSyncBar('syncing', mode === 'local' ? 'Enregistrement local…' : 'Envoi vers le Sheet…');
+  lockButtons(true);
   try {
-    const data = await api({
-      action: 'updateScore', comp: state.comp, password: currentPassword,
-      score1: state.score1, score2: state.score2, faults1: state.faults1, faults2: state.faults2
+    const data = await doAction({
+      action: 'updateScore', comp: state.comp,
+      score1: state.score1, score2: state.score2,
+      faults1: state.faults1, faults2: state.faults2
     });
-    if (data?.error) showToast(data.error, true);
-  } catch(e) { showToast('Erreur sync', true); }
+    if (data?.error) {
+      setSyncBar('error', 'Erreur : ' + data.error);
+      showToast(data.error, true);
+    } else {
+      setSyncBar('synced', mode === 'local' ? 'Enregistré localement' : 'Synchronisé avec le Sheet ✓');
+    }
+  } catch(e) {
+    setSyncBar('error', 'Erreur réseau');
+    showToast('Erreur réseau', true);
+  } finally {
+    lockButtons(false);
+  }
 }
 
-// ---- Reset / Delete ----
-
+// ============================================================
+// RESET / DELETE
+// ============================================================
 let pendingAction = null;
 
 function confirmAction(action) {
   pendingAction = action;
   const isDelete = action === 'delete';
   document.getElementById('modalTitle').textContent = isDelete ? 'SUPPRIMER ?' : 'RÉINITIALISER ?';
-  document.getElementById('modalText').textContent = isDelete
-    ? `Supprimer définitivement "${state.comp}" et toutes ses données ?`
+  document.getElementById('modalText').textContent  = isDelete
+    ? `Supprimer définitivement "${state.comp}" ?`
     : `Remettre les scores de "${state.comp}" à zéro ?`;
   document.getElementById('modalConfirmBtn').textContent = isDelete ? 'Supprimer' : 'Réinitialiser';
   document.getElementById('modalOverlay').classList.add('show');
@@ -283,10 +464,15 @@ function closeModal() {
 document.getElementById('modalConfirmBtn').onclick = async () => {
   closeModal();
   if (!pendingAction || !state.comp) return;
+  setSyncBar('syncing', pendingAction === 'delete' ? 'Suppression…' : 'Réinitialisation…');
+  lockButtons(true);
   try {
-    const data = await api({ action: pendingAction === 'delete' ? 'deleteComp' : 'resetComp', comp: state.comp, password: currentPassword });
-    if (data?.error) { showToast(data.error, true); return; }
-    showToast(pendingAction === 'delete' ? 'Compétition supprimée' : 'Scores remis à zéro');
+    const data = await doAction({
+      action: pendingAction === 'delete' ? 'deleteComp' : 'resetComp',
+      comp: state.comp
+    });
+    if (data?.error) { showToast(data.error, true); setSyncBar('error', data.error); return; }
+    showToast(pendingAction === 'delete' ? 'Supprimé !' : 'Remis à zéro !');
     if (pendingAction === 'delete') {
       state = { comp: null, team1: '', team2: '', score1: 0, score2: 0, faults1: 0, faults2: 0 };
       document.getElementById('compSelect').value = '';
@@ -297,10 +483,15 @@ document.getElementById('modalConfirmBtn').onclick = async () => {
     } else {
       state.score1 = 0; state.score2 = 0; state.faults1 = 0; state.faults2 = 0;
       renderScorePanel();
+      setSyncBar('synced', 'Remis à zéro ✓');
     }
   } catch(e) { showToast('Erreur réseau', true); }
+  finally { lockButtons(false); }
 };
 
+// ============================================================
+// TOAST
+// ============================================================
 let toastTimer;
 function showToast(msg, error = false) {
   const t = document.getElementById('toast');
@@ -308,28 +499,6 @@ function showToast(msg, error = false) {
   t.className = 'toast show' + (error ? ' error' : '');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => { t.className = 'toast'; }, 3000);
-}
-
-async function createCompetition() {
-  const name     = document.getElementById('newCompName').value.trim();
-  const team1    = document.getElementById('newTeam1').value.trim();
-  const team2    = document.getElementById('newTeam2').value.trim();
-  const password = document.getElementById('newPassword').value.trim();
-  if (!name || !team1 || !team2) { showToast('Remplis tous les champs', true); return; }
-  try {
-    const data = await api({ action: 'newCompetition', name, team1, team2, password });
-    if (data?.error) { showToast(data.error, true); return; }
-    showToast('Compétition créée !');
-    document.getElementById('newCompName').value = '';
-    document.getElementById('newTeam1').value = '';
-    document.getElementById('newTeam2').value = '';
-    document.getElementById('newPassword').value = '';
-    await fetchCompetitions();
-    document.getElementById('compSelect').value = name;
-    currentPassword = password;
-    onCompChange();
-    if (!password) loadComp();
-  } catch(e) { showToast('Erreur réseau', true); }
 }
 </script>
 </body>
