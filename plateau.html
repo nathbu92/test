@@ -7,17 +7,24 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
-  :root { --bg: #060608; --accent1: #ff3b3b; --accent2: #3b9eff; --text: #ffffff; --muted: #444; --surface: #111116; --yellow: #ffd60a; }
+  :root { --bg: #060608; --accent1: #ff3b3b; --accent2: #3b9eff; --text: #ffffff; --muted: #444; --surface: #111116; --yellow: #ffd60a; --orange: #ff8c00; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: var(--bg); color: var(--text); font-family: 'DM Mono', monospace; min-height: 100vh; overflow: hidden; }
 
-  #selectorScreen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 40px; gap: 20px; }
+  #selectorScreen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 40px; gap: 16px; }
   #selectorScreen h1 { font-family: 'Bebas Neue', sans-serif; font-size: 4rem; letter-spacing: 10px; text-align: center; }
   #selectorScreen p { color: var(--muted); font-size: 0.8rem; letter-spacing: 2px; text-align: center; }
+
+  /* Mode toggle */
+  .mode-toggle { display: flex; gap: 0; border-radius: 8px; overflow: hidden; border: 1px solid #222; }
+  .mode-btn { padding: 8px 20px; font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 2px; border: none; cursor: pointer; background: var(--surface); color: var(--muted); transition: background 0.15s; }
+  .mode-btn.active.local { background: var(--orange); color: #000; }
+  .mode-btn.active.sheet { background: var(--accent2); color: #000; }
+
   .comp-select { width: 100%; max-width: 560px; background: var(--surface); border: 1px solid #222; color: var(--text); font-family: 'DM Mono', monospace; font-size: 0.85rem; padding: 14px 16px; border-radius: 8px; outline: none; cursor: pointer; }
   .btn-refresh { background: transparent; border: 1px solid #333; color: var(--muted); font-family: 'DM Mono', monospace; font-size: 0.75rem; padding: 8px 16px; border-radius: 6px; cursor: pointer; }
   .btn-refresh:hover { border-color: #555; color: var(--text); }
-  .btn-launch { background: var(--accent1); color: #fff; border: none; font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: 4px; padding: 16px 40px; border-radius: 10px; cursor: pointer; transition: opacity 0.15s; }
+  .btn-launch { background: var(--accent1); color: #fff; border: none; font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: 4px; padding: 16px 40px; border-radius: 10px; cursor: pointer; }
   .btn-launch:hover { opacity: 0.85; }
   .btn-launch:disabled { opacity: 0.3; cursor: not-allowed; }
 
@@ -40,10 +47,12 @@
   .fault-dot.active.right { background: var(--accent2); border-color: var(--accent2); }
   .faults-label-txt { font-size: clamp(0.5rem, 1.5vw, 0.72rem); color: var(--muted); letter-spacing: 2px; }
   .divider { display: flex; align-items: center; justify-content: center; color: var(--muted); font-family: 'Bebas Neue', sans-serif; font-size: 2rem; }
+
   .bottom-bar { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 12px 20px 20px; color: var(--muted); font-size: 0.68rem; letter-spacing: 1px; }
-  .pulse-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); animation: pulse 1s infinite; }
-  .pulse-dot.live { background: var(--yellow); }
-  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
+  .pulse-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .pulse-dot.local { background: var(--orange); animation: pulse 0.5s infinite; }
+  .pulse-dot.sheet  { background: var(--yellow); animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.2} }
 </style>
 </head>
 <body>
@@ -51,6 +60,12 @@
 <div id="selectorScreen">
   <h1>IMPRO<br>SCOREBOARD</h1>
   <p>VUE PLATEAU / SPECTATEURS</p>
+
+  <div class="mode-toggle">
+    <button class="mode-btn local" id="btnLocal" onclick="setMode('local')">⚡ LOCAL</button>
+    <button class="mode-btn sheet" id="btnSheet" onclick="setMode('sheet')">☁ SHEET</button>
+  </div>
+
   <select class="comp-select" id="compList" onchange="document.getElementById('launchBtn').disabled = !this.value">
     <option value="">— Chargement… —</option>
   </select>
@@ -91,33 +106,76 @@
 </div>
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw2Akle07xeT8oUSb9oQLymQGz39-CR10o8wSRbVjYG5f2FH1hmUMfNnHJWU_trJOvE/exec";
-const POLL_INTERVAL = 1000; // 1 seconde
+const SCRIPT_URL     = "https://script.google.com/macros/s/AKfycbzpOS-zHRPZJE9551YPivGgDdo91IEB4l_kBdFn-dwbw-fQ_fXCfIdNKjDipnmpjR5o/exec";
+const LS_STATE_KEY   = 'impro_local_state';
+const LS_COMPLIST_KEY = 'impro_local_complist';
 
+let mode        = localStorage.getItem('impro_mode') || 'sheet';
 let currentComp = '';
 let pollInterval = null;
-let prevState = {};
-let isFetching = false;
+let prevState   = {};
+let isFetching  = false;
 
-async function api(params) {
-  const url = new URL(SCRIPT_URL);
-  Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
-  const res = await fetch(url.toString(), { redirect: 'follow' });
-  return res.json();
+// ============================================================
+// MODE
+// ============================================================
+function setMode(m) {
+  mode = m;
+  localStorage.setItem('impro_mode', m);
+  updateModeUI();
+  fetchCompetitions();
 }
 
-window.onload = () => fetchCompetitions();
+function updateModeUI() {
+  document.getElementById('btnLocal').classList.toggle('active', mode === 'local');
+  document.getElementById('btnLocal').classList.toggle('local', true);
+  document.getElementById('btnSheet').classList.toggle('active', mode === 'sheet');
+  document.getElementById('btnSheet').classList.toggle('sheet', true);
+}
+
+// ============================================================
+// DATA
+// ============================================================
+async function doGetScore(comp) {
+  if (mode === 'local') {
+    const scores = JSON.parse(localStorage.getItem(LS_STATE_KEY) || '{}');
+    return scores[comp] || { error: 'Compétition introuvable' };
+  } else {
+    const url = new URL(SCRIPT_URL);
+    url.searchParams.set('action', 'getScore');
+    url.searchParams.set('comp', comp);
+    const res = await fetch(url.toString(), { redirect: 'follow' });
+    return res.json();
+  }
+}
+
+async function doGetCompetitions() {
+  if (mode === 'local') {
+    const list = JSON.parse(localStorage.getItem(LS_COMPLIST_KEY) || '[]');
+    return { competitions: [...list].reverse() };
+  } else {
+    const url = new URL(SCRIPT_URL);
+    url.searchParams.set('action', 'getCompetitions');
+    const res = await fetch(url.toString(), { redirect: 'follow' });
+    return res.json();
+  }
+}
+
+// ============================================================
+// INIT
+// ============================================================
+window.onload = () => { updateModeUI(); fetchCompetitions(); };
 
 async function fetchCompetitions() {
   try {
-    const data = await api({ action: 'getCompetitions' });
+    const data = await doGetCompetitions();
     const sel = document.getElementById('compList');
     if (!data || data.error) { sel.innerHTML = '<option value="">— Erreur —</option>'; return; }
     sel.innerHTML = '<option value="">— Sélectionner une compétition —</option>';
     (data.competitions || []).forEach(c => {
       const opt = document.createElement('option');
       opt.value = c.name;
-      opt.textContent = c.name + (c.hasPassword ? ' 🔒' : '');
+      opt.textContent = c.name;
       sel.appendChild(opt);
     });
     document.getElementById('launchBtn').disabled = true;
@@ -139,23 +197,26 @@ function goBack() {
   document.getElementById('selectorScreen').style.display = 'flex';
 }
 
+// ============================================================
+// POLLING
+// ============================================================
 function startPolling() {
+  const interval = mode === 'local' ? 200 : 1000; // local = 200ms, sheet = 1s
   fetchAndRender();
-  pollInterval = setInterval(() => {
-    if (!isFetching) fetchAndRender();
-  }, POLL_INTERVAL);
-  document.getElementById('pulseDot').classList.add('live');
+  pollInterval = setInterval(() => { if (!isFetching) fetchAndRender(); }, interval);
+  const dot = document.getElementById('pulseDot');
+  dot.className = 'pulse-dot ' + mode;
 }
 
 function stopPolling() {
   clearInterval(pollInterval);
-  document.getElementById('pulseDot').classList.remove('live');
+  document.getElementById('pulseDot').className = 'pulse-dot';
 }
 
 async function fetchAndRender() {
   isFetching = true;
   try {
-    const data = await api({ action: 'getScore', comp: currentComp });
+    const data = await doGetScore(currentComp);
     if (!data || data.error) return;
 
     const s1Changed = data.score1 !== prevState.score1;
@@ -169,8 +230,9 @@ async function fetchAndRender() {
     updateFaults(2, data.faults2);
 
     const d = new Date(data.lastUpdate);
+    const modeLabel = mode === 'local' ? '⚡' : '☁';
     document.getElementById('lastUpdate').textContent =
-      'Sync ' + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      modeLabel + ' ' + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
     prevState = { ...data };
   } catch(e) {
