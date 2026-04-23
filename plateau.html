@@ -11,52 +11,184 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: var(--bg); color: var(--text); font-family: 'DM Mono', monospace; min-height: 100vh; overflow: hidden; }
 
+  /* ---- Selector ---- */
   #selectorScreen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 40px; gap: 16px; }
   #selectorScreen h1 { font-family: 'Bebas Neue', sans-serif; font-size: 4rem; letter-spacing: 10px; text-align: center; }
-  #selectorScreen p { color: var(--muted); font-size: 0.8rem; letter-spacing: 2px; text-align: center; }
+  #selectorScreen p { color: var(--muted); font-size: 0.8rem; letter-spacing: 2px; }
 
-  /* Mode toggle */
-  .mode-toggle { display: flex; gap: 0; border-radius: 8px; overflow: hidden; border: 1px solid #222; }
-  .mode-btn { padding: 8px 20px; font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 2px; border: none; cursor: pointer; background: var(--surface); color: var(--muted); transition: background 0.15s; }
+  .mode-toggle { display: flex; border-radius: 8px; overflow: hidden; border: 1px solid #222; }
+  .mode-btn { padding: 8px 20px; font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 2px; border: none; cursor: pointer; background: var(--surface); color: var(--muted); }
   .mode-btn.active.local { background: var(--orange); color: #000; }
   .mode-btn.active.sheet { background: var(--accent2); color: #000; }
 
-  .comp-select { width: 100%; max-width: 560px; background: var(--surface); border: 1px solid #222; color: var(--text); font-family: 'DM Mono', monospace; font-size: 0.85rem; padding: 14px 16px; border-radius: 8px; outline: none; cursor: pointer; }
+  .comp-select { width: 100%; max-width: 520px; background: var(--surface); border: 1px solid #222; color: var(--text); font-family: 'DM Mono', monospace; font-size: 0.85rem; padding: 14px 16px; border-radius: 8px; outline: none; cursor: pointer; }
   .btn-refresh { background: transparent; border: 1px solid #333; color: var(--muted); font-family: 'DM Mono', monospace; font-size: 0.75rem; padding: 8px 16px; border-radius: 6px; cursor: pointer; }
   .btn-refresh:hover { border-color: #555; color: var(--text); }
   .btn-launch { background: var(--accent1); color: #fff; border: none; font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: 4px; padding: 16px 40px; border-radius: 10px; cursor: pointer; }
   .btn-launch:hover { opacity: 0.85; }
   .btn-launch:disabled { opacity: 0.3; cursor: not-allowed; }
 
-  #scoreScreen { display: none; height: 100vh; flex-direction: column; position: relative; }
-  .back-btn { position: absolute; top: 16px; left: 16px; background: transparent; border: 1px solid #222; color: var(--muted); font-family: 'DM Mono', monospace; font-size: 0.7rem; padding: 6px 12px; border-radius: 6px; cursor: pointer; z-index: 10; }
-  .back-btn:hover { border-color: #444; color: var(--text); }
-  .comp-title { text-align: center; font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 6px; color: var(--muted); padding-top: 20px; }
-  .arena { flex: 1; display: grid; grid-template-columns: 1fr 60px 1fr; align-items: center; padding: 20px; }
-  .team-side { display: flex; flex-direction: column; align-items: center; gap: 16px; }
-  .team-label { font-family: 'Bebas Neue', sans-serif; font-size: clamp(1.4rem, 4vw, 2.4rem); letter-spacing: 4px; text-align: center; }
-  .team-side.left .team-label { color: var(--accent1); }
-  .team-side.right .team-label { color: var(--accent2); }
-  .score-num { font-family: 'Bebas Neue', sans-serif; font-size: clamp(6rem, 18vw, 14rem); line-height: 0.9; text-align: center; transition: transform 0.15s ease; }
-  .team-side.left .score-num { color: var(--accent1); }
-  .team-side.right .score-num { color: var(--accent2); }
-  .score-num.bump { transform: scale(1.15); }
-  .faults-row { display: flex; gap: 10px; align-items: center; }
-  .fault-dot { width: clamp(14px, 2.5vw, 22px); height: clamp(14px, 2.5vw, 22px); border-radius: 50%; border: 2px solid #333; transition: background 0.2s; }
-  .fault-dot.active.left { background: var(--accent1); border-color: var(--accent1); }
-  .fault-dot.active.right { background: var(--accent2); border-color: var(--accent2); }
-  .faults-label-txt { font-size: clamp(0.5rem, 1.5vw, 0.72rem); color: var(--muted); letter-spacing: 2px; }
-  .divider { display: flex; align-items: center; justify-content: center; color: var(--muted); font-family: 'Bebas Neue', sans-serif; font-size: 2rem; }
+  /* ---- Score screen ---- */
+  #scoreScreen { display: none; height: 100vh; flex-direction: column; position: relative; overflow: hidden; }
+  .back-btn { position: absolute; top: 14px; left: 14px; background: transparent; border: 1px solid #1a1a1a; color: #333; font-family: 'DM Mono', monospace; font-size: 0.65rem; padding: 5px 10px; border-radius: 6px; cursor: pointer; z-index: 10; }
+  .back-btn:hover { border-color: #333; color: var(--muted); }
+  .comp-title { text-align: center; font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 6px; color: #2a2a2a; padding-top: 18px; }
 
-  .bottom-bar { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 12px 20px 20px; color: var(--muted); font-size: 0.68rem; letter-spacing: 1px; }
-  .pulse-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-  .pulse-dot.local { background: var(--orange); animation: pulse 0.5s infinite; }
-  .pulse-dot.sheet  { background: var(--yellow); animation: pulse 1s infinite; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.2} }
+  .arena { flex: 1; display: grid; grid-template-columns: 1fr 50px 1fr; align-items: center; padding: 10px 30px 10px; position: relative; }
+
+  .team-side { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+
+  .team-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(1.4rem, 4vw, 2.4rem);
+    letter-spacing: 4px;
+    text-align: center;
+    transition: transform 0.2s;
+  }
+  .team-side.left  .team-label { color: var(--accent1); }
+  .team-side.right .team-label { color: var(--accent2); }
+
+  .score-wrap { position: relative; }
+  .score-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(6rem, 18vw, 13rem);
+    line-height: 0.9;
+    text-align: center;
+    display: block;
+  }
+  .team-side.left  .score-num { color: var(--accent1); }
+  .team-side.right .score-num { color: var(--accent2); }
+  .score-num.pop { animation: scorePop 0.4s ease; }
+  @keyframes scorePop {
+    0%   { transform: scale(1); }
+    35%  { transform: scale(1.35); }
+    65%  { transform: scale(0.93); }
+    100% { transform: scale(1); }
+  }
+
+  .faults-row { display: flex; gap: clamp(6px, 1.5vw, 14px); align-items: center; }
+  .fault-dot {
+    width: clamp(14px, 2.8vw, 24px);
+    height: clamp(14px, 2.8vw, 24px);
+    border-radius: 50%;
+    border: 2px solid #222;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .fault-dot.active.left  { background: var(--accent1); border-color: var(--accent1); }
+  .fault-dot.active.right { background: var(--accent2); border-color: var(--accent2); }
+  .fault-dot.pop { animation: dotPop 0.35s ease; }
+  @keyframes dotPop { 0%{transform:scale(1)} 50%{transform:scale(1.8)} 100%{transform:scale(1)} }
+
+  .faults-label-txt { font-size: clamp(0.45rem, 1.2vw, 0.68rem); color: #2a2a2a; letter-spacing: 2px; }
+
+  .divider { display: flex; align-items: center; justify-content: center; color: #1e1e1e; font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; }
+
+  .bottom-bar { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 10px 20px 16px; color: #222; font-size: 0.62rem; letter-spacing: 1px; }
+  .pulse-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .pulse-dot.local { background: var(--orange); animation: pulse 0.4s infinite; }
+  .pulse-dot.sheet  { background: #2a2a2a; animation: pulse 1.2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.15} }
+
+  /* Floating +1 */
+  .float-label {
+    position: fixed;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(4rem, 10vw, 8rem);
+    pointer-events: none;
+    z-index: 999;
+    animation: floatUp 1.3s ease forwards;
+    text-shadow: 0 0 40px currentColor;
+    letter-spacing: 2px;
+  }
+  @keyframes floatUp {
+    0%   { opacity: 0; transform: translateY(20px) scale(0.6); }
+    20%  { opacity: 1; transform: translateY(0px) scale(1.1); }
+    60%  { opacity: 1; transform: translateY(-60px) scale(1); }
+    100% { opacity: 0; transform: translateY(-130px) scale(0.7); }
+  }
+
+  /* Fault big text */
+  .fault-popup {
+    position: fixed;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3rem, 8vw, 6rem);
+    pointer-events: none;
+    z-index: 999;
+    letter-spacing: 4px;
+    animation: faultAnim 1s ease forwards;
+  }
+  @keyframes faultAnim {
+    0%  { opacity: 0; transform: scale(0.5) rotate(-5deg); }
+    25% { opacity: 1; transform: scale(1.1) rotate(2deg); }
+    70% { opacity: 1; transform: scale(1) rotate(0); }
+    100%{ opacity: 0; transform: scale(0.8) translateY(-30px); }
+  }
+
+  /* Flash */
+  .fault-flash { position: fixed; inset: 0; pointer-events: none; z-index: 997; opacity: 0; }
+  .fault-flash.t1 { background: radial-gradient(ellipse at center, rgba(255,59,59,0.3) 0%, transparent 65%); }
+  .fault-flash.t2 { background: radial-gradient(ellipse at center, rgba(59,158,255,0.3) 0%, transparent 65%); }
+  .fault-flash.show { animation: flashIn 0.55s ease; }
+  @keyframes flashIn { 0%{opacity:0} 25%{opacity:1} 100%{opacity:0} }
+
+  #confettiCanvas { position: fixed; inset: 0; pointer-events: none; z-index: 998; }
+
+  /* ---- Overlay mi-temps ---- */
+  #halftimeOverlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(6,6,8,0.96);
+    z-index: 900;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+  }
+  #halftimeOverlay.show { display: flex; }
+
+  .ht-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(1.2rem, 4vw, 2rem);
+    letter-spacing: 8px;
+    color: #2a2a2a;
+  }
+  .ht-timer {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(6rem, 22vw, 18rem);
+    line-height: 0.9;
+    color: var(--green);
+    letter-spacing: 6px;
+    text-shadow: 0 0 60px rgba(61,220,132,0.4);
+    transition: color 0.3s;
+  }
+  .ht-timer.urgent {
+    color: var(--accent1);
+    text-shadow: 0 0 60px rgba(255,59,59,0.5);
+    animation: urgentPulse 0.5s infinite;
+  }
+  @keyframes urgentPulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+  .ht-sublabel {
+    font-family: 'DM Mono', monospace;
+    font-size: clamp(0.6rem, 2vw, 0.85rem);
+    color: #222;
+    letter-spacing: 3px;
+  }
 </style>
 </head>
 <body>
 
+<canvas id="confettiCanvas"></canvas>
+<div class="fault-flash t1" id="flash1"></div>
+<div class="fault-flash t2" id="flash2"></div>
+
+<!-- ========== OVERLAY MI-TEMPS ========== -->
+<div id="halftimeOverlay">
+  <div class="ht-label">MI-TEMPS</div>
+  <div class="ht-timer" id="htTimer">15:00</div>
+  <div class="ht-sublabel">REPRISE DANS…</div>
+</div>
+
+<!-- ========== SELECTOR ========== -->
 <div id="selectorScreen">
   <h1>IMPRO<br>SCOREBOARD</h1>
   <p>VUE PLATEAU / SPECTATEURS</p>
@@ -73,13 +205,17 @@
   <button class="btn-launch" id="launchBtn" onclick="launchScoreboard()" disabled>AFFICHER LE PLATEAU</button>
 </div>
 
+<!-- ========== SCORE SCREEN ========== -->
 <div id="scoreScreen">
   <button class="back-btn" onclick="goBack()">← Retour</button>
   <div class="comp-title" id="compTitleDisplay"></div>
+
   <div class="arena">
     <div class="team-side left">
       <div class="team-label" id="team1Name">ÉQUIPE 1</div>
-      <div class="score-num" id="score1">0</div>
+      <div class="score-wrap">
+        <span class="score-num" id="score1">0</span>
+      </div>
       <div class="faults-row">
         <span class="faults-label-txt">FAUTES</span>
         <div class="fault-dot left" id="f1_1"></div>
@@ -87,10 +223,14 @@
         <div class="fault-dot left" id="f1_3"></div>
       </div>
     </div>
+
     <div class="divider">—</div>
+
     <div class="team-side right">
       <div class="team-label" id="team2Name">ÉQUIPE 2</div>
-      <div class="score-num" id="score2">0</div>
+      <div class="score-wrap">
+        <span class="score-num" id="score2">0</span>
+      </div>
       <div class="faults-row">
         <div class="fault-dot right" id="f2_1"></div>
         <div class="fault-dot right" id="f2_2"></div>
@@ -99,6 +239,7 @@
       </div>
     </div>
   </div>
+
   <div class="bottom-bar">
     <div class="pulse-dot" id="pulseDot"></div>
     <span id="lastUpdate">—</span>
@@ -106,13 +247,15 @@
 </div>
 
 <script>
-const SCRIPT_URL     = "https://script.google.com/macros/s/AKfycbzpOS-zHRPZJE9551YPivGgDdo91IEB4l_kBdFn-dwbw-fQ_fXCfIdNKjDipnmpjR5o/exec";
-const LS_STATE_KEY   = 'impro_local_state';
+const SCRIPT_URL      = "https://script.google.com/macros/s/AKfycbxBQNBaa3vgQbtNjb2wVjdbM9mMHcYohuLnTQIMJAJ5el2y2qyT76lcspSPqTLUrAnG/exec";
+const LS_STATE_KEY    = 'impro_local_state';
 const LS_COMPLIST_KEY = 'impro_local_complist';
+const LS_CHRONO_KEY   = 'impro_chrono';
 
 let mode        = localStorage.getItem('impro_mode') || 'sheet';
 let currentComp = '';
 let pollInterval = null;
+let chronoInterval = null;
 let prevState   = {};
 let isFetching  = false;
 
@@ -127,10 +270,8 @@ function setMode(m) {
 }
 
 function updateModeUI() {
-  document.getElementById('btnLocal').classList.toggle('active', mode === 'local');
-  document.getElementById('btnLocal').classList.toggle('local', true);
-  document.getElementById('btnSheet').classList.toggle('active', mode === 'sheet');
-  document.getElementById('btnSheet').classList.toggle('sheet', true);
+  document.getElementById('btnLocal').className = 'mode-btn local' + (mode === 'local' ? ' active' : '');
+  document.getElementById('btnSheet').className = 'mode-btn sheet' + (mode === 'sheet' ? ' active' : '');
 }
 
 // ============================================================
@@ -139,26 +280,24 @@ function updateModeUI() {
 async function doGetScore(comp) {
   if (mode === 'local') {
     const scores = JSON.parse(localStorage.getItem(LS_STATE_KEY) || '{}');
-    return scores[comp] || { error: 'Compétition introuvable' };
-  } else {
-    const url = new URL(SCRIPT_URL);
-    url.searchParams.set('action', 'getScore');
-    url.searchParams.set('comp', comp);
-    const res = await fetch(url.toString(), { redirect: 'follow' });
-    return res.json();
+    return scores[comp] || { error: 'introuvable' };
   }
+  const url = new URL(SCRIPT_URL);
+  url.searchParams.set('action', 'getScore');
+  url.searchParams.set('comp', comp);
+  const res = await fetch(url.toString(), { redirect: 'follow' });
+  return res.json();
 }
 
 async function doGetCompetitions() {
   if (mode === 'local') {
     const list = JSON.parse(localStorage.getItem(LS_COMPLIST_KEY) || '[]');
     return { competitions: [...list].reverse() };
-  } else {
-    const url = new URL(SCRIPT_URL);
-    url.searchParams.set('action', 'getCompetitions');
-    const res = await fetch(url.toString(), { redirect: 'follow' });
-    return res.json();
   }
+  const url = new URL(SCRIPT_URL);
+  url.searchParams.set('action', 'getCompetitions');
+  const res = await fetch(url.toString(), { redirect: 'follow' });
+  return res.json();
 }
 
 // ============================================================
@@ -179,7 +318,7 @@ async function fetchCompetitions() {
       sel.appendChild(opt);
     });
     document.getElementById('launchBtn').disabled = true;
-  } catch(e) { console.error(e); }
+  } catch(e) {}
 }
 
 function launchScoreboard() {
@@ -188,6 +327,7 @@ function launchScoreboard() {
   document.getElementById('compTitleDisplay').textContent = currentComp.toUpperCase();
   document.getElementById('selectorScreen').style.display = 'none';
   document.getElementById('scoreScreen').style.display = 'flex';
+  prevState = {};
   startPolling();
 }
 
@@ -201,16 +341,20 @@ function goBack() {
 // POLLING
 // ============================================================
 function startPolling() {
-  const interval = mode === 'local' ? 200 : 1000; // local = 200ms, sheet = 1s
+  const interval = mode === 'local' ? 200 : 1000;
   fetchAndRender();
   pollInterval = setInterval(() => { if (!isFetching) fetchAndRender(); }, interval);
-  const dot = document.getElementById('pulseDot');
-  dot.className = 'pulse-dot ' + mode;
+  document.getElementById('pulseDot').className = 'pulse-dot ' + mode;
+  // Chrono mi-temps — poll toutes les 500ms depuis LS
+  chronoInterval = setInterval(updateChronoOverlay, 500);
+  updateChronoOverlay();
 }
 
 function stopPolling() {
   clearInterval(pollInterval);
+  clearInterval(chronoInterval);
   document.getElementById('pulseDot').className = 'pulse-dot';
+  document.getElementById('halftimeOverlay').classList.remove('show');
 }
 
 async function fetchAndRender() {
@@ -219,46 +363,207 @@ async function fetchAndRender() {
     const data = await doGetScore(currentComp);
     if (!data || data.error) return;
 
-    const s1Changed = data.score1 !== prevState.score1;
-    const s2Changed = data.score2 !== prevState.score2;
+    // Détecte les changements
+    const s1Up = prevState.score1 !== undefined && data.score1 > prevState.score1;
+    const s2Up = prevState.score2 !== undefined && data.score2 > prevState.score2;
+    const f1Up = prevState.faults1 !== undefined && data.faults1 > prevState.faults1;
+    const f2Up = prevState.faults2 !== undefined && data.faults2 > prevState.faults2;
+    // Détecte reset de fautes (3 → 0) = faute transformée en point
+    const f1Reset = prevState.faults1 >= 2 && data.faults1 === 0;
+    const f2Reset = prevState.faults2 >= 2 && data.faults2 === 0;
 
     document.getElementById('team1Name').textContent = data.team1;
     document.getElementById('team2Name').textContent = data.team2;
-    updateScore('score1', data.score1, s1Changed);
-    updateScore('score2', data.score2, s2Changed);
-    updateFaults(1, data.faults1);
-    updateFaults(2, data.faults2);
+
+    updateScoreEl('score1', data.score1, s1Up);
+    updateScoreEl('score2', data.score2, s2Up);
+    updateFaultDots(1, data.faults1, f1Up);
+    updateFaultDots(2, data.faults2, f2Up);
+
+    if (s1Up) { triggerScoreAnim(1); }
+    if (s2Up) { triggerScoreAnim(2); }
+    if (f1Up) { triggerFaultAnim(1, data.faults1); }
+    if (f2Up) { triggerFaultAnim(2, data.faults2); }
+    if (f1Reset && s2Up) { showFaultToPoint(2, data.team2); }
+    if (f2Reset && s1Up) { showFaultToPoint(1, data.team1); }
 
     const d = new Date(data.lastUpdate);
-    const modeLabel = mode === 'local' ? '⚡' : '☁';
     document.getElementById('lastUpdate').textContent =
-      modeLabel + ' ' + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      (mode === 'local' ? '⚡ ' : '☁ ') +
+      d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
     prevState = { ...data };
-  } catch(e) {
-    console.error(e);
-  } finally {
-    isFetching = false;
-  }
+  } catch(e) {}
+  finally { isFetching = false; }
 }
 
-function updateScore(id, value, changed) {
+function updateScoreEl(id, value, changed) {
   const el = document.getElementById(id);
   el.textContent = value;
   if (changed) {
-    el.classList.remove('bump');
+    el.classList.remove('pop');
     void el.offsetWidth;
-    el.classList.add('bump');
-    setTimeout(() => el.classList.remove('bump'), 200);
+    el.classList.add('pop');
+    setTimeout(() => el.classList.remove('pop'), 450);
   }
 }
 
-function updateFaults(team, count) {
+function updateFaultDots(team, count, newFault) {
   for (let i = 1; i <= 3; i++) {
-    const dot = document.getElementById(`f${team}_${i}`);
+    const dot  = document.getElementById(`f${team}_${i}`);
     const side = team === 1 ? 'left' : 'right';
+    const wasInactive = !dot.classList.contains('active');
     dot.className = 'fault-dot ' + side + (i <= count ? ' active' : '');
+    if (newFault && i === count && wasInactive) {
+      dot.classList.add('pop');
+      setTimeout(() => dot.classList.remove('pop'), 400);
+    }
   }
+}
+
+// ============================================================
+// ANIMATIONS PLATEAU
+// ============================================================
+function triggerScoreAnim(team) {
+  const wrap = document.querySelector(`.team-side.${team === 1 ? 'left' : 'right'} .score-wrap`);
+  if (!wrap) return;
+  const rect  = wrap.getBoundingClientRect();
+  const color = team === 1 ? '#ff4d4d' : '#4daaff';
+
+  // +1 flottant
+  const el = document.createElement('div');
+  el.className  = 'float-label';
+  el.textContent = '+1';
+  el.style.color = color;
+  el.style.left  = (rect.left + rect.width / 2 - 60) + 'px';
+  el.style.top   = (rect.top + rect.height / 2) + 'px';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1400);
+
+  // Confetti
+  launchConfetti(team);
+}
+
+function triggerFaultAnim(team, faultCount) {
+  // Flash
+  const flash = document.getElementById(`flash${team}`);
+  flash.classList.remove('show');
+  void flash.offsetWidth;
+  flash.classList.add('show');
+  setTimeout(() => flash.classList.remove('show'), 600);
+
+  // Texte FAUTE!
+  const color = team === 1 ? '#ff4d4d' : '#4daaff';
+  const side  = document.querySelector(`.team-side.${team === 1 ? 'left' : 'right'}`);
+  if (side) {
+    const rect = side.getBoundingClientRect();
+    const el   = document.createElement('div');
+    el.className   = 'fault-popup';
+    el.textContent = `FAUTE ${faultCount}/3`;
+    el.style.color = color;
+    el.style.left  = (rect.left + rect.width / 2 - 100) + 'px';
+    el.style.top   = (rect.top + 20) + 'px';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1100);
+  }
+}
+
+function showFaultToPoint(teamThatScored, teamName) {
+  // Message "3 fautes → point"
+  const el = document.createElement('div');
+  el.className = 'fault-popup';
+  el.style.color = teamThatScored === 1 ? '#ff4d4d' : '#4daaff';
+  el.style.fontSize = 'clamp(1.5rem, 4vw, 3rem)';
+  el.style.left = '50%';
+  el.style.transform = 'translateX(-50%)';
+  el.style.top = '40%';
+  el.style.textAlign = 'center';
+  el.style.whiteSpace = 'nowrap';
+  el.textContent = `3 FAUTES → +1 ${teamName.toUpperCase()}`;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1200);
+}
+
+function updateChronoOverlay() {
+  const saved = JSON.parse(localStorage.getItem(LS_CHRONO_KEY) || 'null');
+  const overlay = document.getElementById('halftimeOverlay');
+  const timer   = document.getElementById('htTimer');
+
+  if (!saved || !saved.active || !saved.endTime) {
+    overlay.classList.remove('show');
+    return;
+  }
+
+  const remaining = Math.max(0, Math.round((saved.endTime - Date.now()) / 1000));
+  const m = Math.floor(remaining / 60);
+  const s = remaining % 60;
+  timer.textContent = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+  timer.classList.toggle('urgent', remaining <= 30 && remaining > 0);
+
+  if (remaining <= 0) {
+    overlay.classList.remove('show');
+  } else {
+    overlay.classList.add('show');
+  }
+}
+
+// ---- Confetti ----
+const canvas  = document.getElementById('confettiCanvas');
+const ctx     = canvas.getContext('2d');
+let particles = [];
+let animId    = null;
+
+function launchConfetti(team) {
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const colors = team === 1
+    ? ['#ff4d4d','#ff8888','#ffbbbb','#ffffff','#ffd60a','#ff6b6b']
+    : ['#4daaff','#88ccff','#bbddff','#ffffff','#3ddc84','#7ec8ff'];
+
+  const side = team === 1 ? 0 : canvas.width;
+  for (let i = 0; i < 100; i++) {
+    particles.push({
+      x: side + (Math.random() - 0.5) * 200,
+      y: canvas.height * 0.3 + Math.random() * canvas.height * 0.3,
+      vx: (team === 1 ? 1 : -1) * (Math.random() * 8 + 2),
+      vy: -(Math.random() * 10 + 5),
+      size: Math.random() * 12 + 5,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      rot: Math.random() * 360,
+      rotSpeed: (Math.random() - 0.5) * 12,
+      shape: Math.random() > 0.4 ? 'rect' : 'circle',
+      life: 1
+    });
+  }
+  if (!animId) animateConfetti();
+}
+
+function animateConfetti() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  particles = particles.filter(p => p.life > 0.01);
+  particles.forEach(p => {
+    p.x   += p.vx;
+    p.y   += p.vy;
+    p.rot += p.rotSpeed;
+    p.vy  += 0.3;
+    p.vx  *= 0.99;
+    p.life -= 0.013;
+    ctx.save();
+    ctx.globalAlpha = Math.max(0, p.life);
+    ctx.translate(p.x, p.y);
+    ctx.rotate(p.rot * Math.PI / 180);
+    ctx.fillStyle = p.color;
+    if (p.shape === 'rect') {
+      ctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2);
+    } else {
+      ctx.beginPath();
+      ctx.arc(0, 0, p.size / 2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  });
+  if (particles.length > 0) { animId = requestAnimationFrame(animateConfetti); }
+  else { ctx.clearRect(0, 0, canvas.width, canvas.height); animId = null; }
 }
 </script>
 </body>
