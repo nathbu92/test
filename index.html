@@ -10,22 +10,18 @@
   :root {
     --bg: #0d0d0d; --surface: #1a1a1a; --border: #2e2e2e;
     --accent1: #ff4d4d; --accent2: #4daaff; --text: #f0f0f0;
-    --muted: #666; --green: #3ddc84; --yellow: #ffd60a; --red: #ff4d4d;
-    --orange: #ff8c00;
+    --muted: #666; --green: #3ddc84; --yellow: #ffd60a;
+    --red: #ff4d4d; --orange: #ff8c00;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: var(--bg); color: var(--text); font-family: 'DM Mono', monospace; min-height: 100vh; padding: 20px; }
 
-  /* Header */
-  .header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 4px; flex-wrap: wrap; gap: 10px; }
+  .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; flex-wrap: wrap; gap: 10px; }
   h1 { font-family: 'Bebas Neue', sans-serif; font-size: 2.4rem; letter-spacing: 4px; }
   .subtitle { color: var(--muted); font-size: 0.75rem; margin-bottom: 20px; }
 
-  /* Mode toggle */
-  .mode-toggle { display: flex; gap: 0; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
-  .mode-btn { padding: 8px 18px; font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 2px; border: none; cursor: pointer; transition: background 0.15s, color 0.15s; }
-  .mode-btn.local  { background: var(--surface); color: var(--muted); }
-  .mode-btn.sheet  { background: var(--surface); color: var(--muted); }
+  .mode-toggle { display: flex; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+  .mode-btn { padding: 8px 18px; font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 2px; border: none; cursor: pointer; background: var(--surface); color: var(--muted); transition: background 0.15s, color 0.15s; }
   .mode-btn.active.local { background: var(--orange); color: #000; }
   .mode-btn.active.sheet { background: var(--accent2); color: #000; }
 
@@ -34,89 +30,322 @@
   .mode-badge.sheet { background: rgba(77,170,255,0.1); color: var(--accent2); border: 1px solid rgba(77,170,255,0.2); }
   .mode-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 
-  .panels { display: grid; grid-template-columns: 300px 1fr; gap: 20px; }
-  @media (max-width: 700px) { .panels { grid-template-columns: 1fr; } }
-  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
-  .panel-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; letter-spacing: 3px; color: var(--muted); margin-bottom: 16px; }
-  .field { margin-bottom: 12px; }
-  .field label { display: block; font-size: 0.7rem; color: var(--muted); margin-bottom: 4px; }
-  .field input { width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 0.85rem; padding: 10px 12px; border-radius: 6px; outline: none; }
-  .field input:focus { border-color: var(--accent2); }
+  /* Setup screen */
+  #setupScreen { display: none; }
+  #setupScreen.show { display: block; }
 
-  .btn-create { width: 100%; background: var(--green); color: #000; border: none; font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; letter-spacing: 2px; padding: 12px; border-radius: 8px; cursor: pointer; margin-top: 6px; position: relative; }
-  .btn-create:hover { opacity: 0.85; }
-  .btn-create:disabled { opacity: 0.5; cursor: not-allowed; }
+  .setup-arena {
+    display: grid;
+    grid-template-columns: 1fr 120px 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+    align-items: start;
+  }
 
-  .select-comp { width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 0.8rem; padding: 10px 12px; border-radius: 6px; outline: none; margin-bottom: 12px; cursor: pointer; }
-  .btn-sm { background: var(--accent2); color: #000; border: none; font-family: 'DM Mono', monospace; font-weight: 500; font-size: 0.75rem; padding: 8px 14px; border-radius: 6px; cursor: pointer; width: 100%; text-align: center; margin-bottom: 6px; position: relative; }
-  .btn-sm:hover { opacity: 0.85; }
-  .btn-sm:disabled { opacity: 0.5; cursor: not-allowed; }
-  .btn-danger { background: transparent; color: var(--red); border: 1px solid var(--red); font-family: 'DM Mono', monospace; font-size: 0.75rem; padding: 8px 14px; border-radius: 6px; cursor: pointer; width: 100%; text-align: center; margin-bottom: 6px; }
-  .btn-danger:hover { background: rgba(255,77,77,0.1); }
-  .btn-danger:disabled { opacity: 0.5; cursor: not-allowed; }
-  .btn-warn { background: transparent; color: var(--yellow); border: 1px solid var(--yellow); font-family: 'DM Mono', monospace; font-size: 0.75rem; padding: 8px 14px; border-radius: 6px; cursor: pointer; width: 100%; text-align: center; margin-bottom: 6px; }
-  .btn-warn:hover { background: rgba(255,214,10,0.08); }
-  .btn-warn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .setup-team {
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 20px;
+    transition: border-color 0.2s;
+  }
+  .setup-team.left { border-color: rgba(255,77,77,0.3); }
+  .setup-team.right { border-color: rgba(77,170,255,0.3); }
 
-  .scoreboard { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  .team-block { border-radius: 10px; padding: 20px; border: 2px solid transparent; }
-  .team-block.team1 { background: rgba(255,77,77,0.06); border-color: rgba(255,77,77,0.2); }
-  .team-block.team2 { background: rgba(77,170,255,0.06); border-color: rgba(77,170,255,0.2); }
-  .team-name { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; letter-spacing: 3px; margin-bottom: 12px; text-align: center; }
-  .team-block.team1 .team-name { color: var(--accent1); }
-  .team-block.team2 .team-name { color: var(--accent2); }
-  .score-display { font-family: 'Bebas Neue', sans-serif; font-size: 5rem; text-align: center; line-height: 1; margin-bottom: 16px; }
-  .team-block.team1 .score-display { color: var(--accent1); }
-  .team-block.team2 .score-display { color: var(--accent2); }
+  .team-side-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 3px;
+    margin-bottom: 12px;
+    text-align: center;
+  }
+  .setup-team.left  .team-side-label { color: var(--accent1); }
+  .setup-team.right .team-side-label { color: var(--accent2); }
+
+  .team-name-input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    letter-spacing: 3px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    outline: none;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+  .setup-team.left  .team-name-input:focus { border-color: var(--accent1); }
+  .setup-team.right .team-name-input:focus { border-color: var(--accent2); }
+
+  .setup-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding-top: 40px;
+  }
+  .setup-vs { font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem; color: var(--muted); letter-spacing: 4px; }
+
+  .field-sm { margin-bottom: 8px; }
+  .field-sm label { display: block; font-size: 0.62rem; color: var(--muted); margin-bottom: 4px; text-align: center; }
+  .field-sm input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    padding: 8px 10px;
+    border-radius: 6px;
+    outline: none;
+    text-align: center;
+  }
+  .field-sm input:focus { border-color: var(--accent2); }
+
+  .btn-create-big {
+    width: 100%;
+    background: var(--green);
+    color: #000;
+    border: none;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.3rem;
+    letter-spacing: 3px;
+    padding: 14px;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+  .btn-create-big:hover { opacity: 0.85; }
+  .btn-create-big:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* Game screen */
+  #gameScreen { display: none; }
+  #gameScreen.show { display: block; }
+
+  .game-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .comp-select-row { display: flex; gap: 8px; align-items: center; flex: 1; }
+  .select-comp { background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 0.8rem; padding: 8px 12px; border-radius: 6px; outline: none; cursor: pointer; flex: 1; }
+
+  .game-actions { display: flex; gap: 8px; }
+  .btn-icon { background: transparent; border: 1px solid var(--border); color: var(--muted); font-family: 'DM Mono', monospace; font-size: 0.72rem; padding: 7px 12px; border-radius: 6px; cursor: pointer; white-space: nowrap; }
+  .btn-icon:hover { border-color: #555; color: var(--text); }
+  .btn-icon.warn { border-color: rgba(255,214,10,0.4); color: var(--yellow); }
+  .btn-icon.warn:hover { background: rgba(255,214,10,0.08); }
+  .btn-icon.danger { border-color: rgba(255,77,77,0.4); color: var(--red); }
+  .btn-icon.danger:hover { background: rgba(255,77,77,0.08); }
+  .btn-icon.new { border-color: rgba(61,220,132,0.4); color: var(--green); }
+  .btn-icon.new:hover { background: rgba(61,220,132,0.08); }
+
+  /* Score cards */
+  .scoreboard {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    position: relative;
+  }
+
+  .team-card {
+    border-radius: 12px;
+    padding: 24px 20px;
+    border: 2px solid transparent;
+    position: relative;
+    overflow: visible;
+  }
+  .team-card.team1 { background: rgba(255,77,77,0.06); border-color: rgba(255,77,77,0.25); }
+  .team-card.team2 { background: rgba(77,170,255,0.06); border-color: rgba(77,170,255,0.25); }
+
+  .team-card-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    letter-spacing: 4px;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+  .team-card.team1 .team-card-name { color: var(--accent1); }
+  .team-card.team2 .team-card-name { color: var(--accent2); }
+
+  .score-wrap { position: relative; text-align: center; margin-bottom: 16px; }
+
+  .score-display {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 6rem;
+    line-height: 1;
+    display: inline-block;
+    transition: transform 0.1s;
+  }
+  .team-card.team1 .score-display { color: var(--accent1); }
+  .team-card.team2 .score-display { color: var(--accent2); }
+  .score-display.pop { animation: scorePop 0.35s ease; }
+
+  @keyframes scorePop {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.3); }
+    70%  { transform: scale(0.95); }
+    100% { transform: scale(1); }
+  }
+
   .score-btns { display: flex; gap: 8px; justify-content: center; margin-bottom: 20px; }
-  .btn-score { width: 52px; height: 52px; border: none; border-radius: 8px; font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; cursor: pointer; transition: transform 0.1s, opacity 0.15s; position: relative; }
-  .btn-score:active { transform: scale(0.93); }
-  .btn-score:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-score { width: 56px; height: 56px; border: none; border-radius: 10px; font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; cursor: pointer; transition: transform 0.1s; }
+  .btn-score:active { transform: scale(0.9); }
+  .btn-score:disabled { opacity: 0.35; cursor: not-allowed; }
   .btn-plus { background: var(--green); color: #000; }
   .btn-minus { background: var(--border); color: var(--text); }
-  .faults-label { font-size: 0.65rem; color: var(--muted); text-align: center; margin-bottom: 8px; letter-spacing: 2px; }
-  .faults-dots { display: flex; justify-content: center; gap: 10px; margin-bottom: 10px; }
-  .dot { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--border); transition: background 0.15s; }
-  .dot.active.team1 { background: var(--accent1); border-color: var(--accent1); }
-  .dot.active.team2 { background: var(--accent2); border-color: var(--accent2); }
-  .fault-btn { display: block; width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--yellow); font-family: 'DM Mono', monospace; font-size: 0.72rem; cursor: pointer; text-align: center; }
-  .fault-btn:hover { background: rgba(255,214,10,0.08); }
-  .fault-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-  /* Spinner inline */
-  .spinner { display: none; width: 14px; height: 14px; border: 2px solid rgba(0,0,0,0.3); border-top-color: #000; border-radius: 50%; animation: spin 0.6s linear infinite; vertical-align: middle; margin-left: 6px; }
-  .spinner.white { border-color: rgba(255,255,255,0.3); border-top-color: #fff; }
-  .spinner.show { display: inline-block; }
-  @keyframes spin { to { transform: rotate(360deg); } }
+  /* Fautes */
+  .faults-section { text-align: center; }
+  .faults-title { font-size: 0.6rem; color: var(--muted); letter-spacing: 2px; margin-bottom: 10px; }
+  .faults-dots { display: flex; justify-content: center; gap: 12px; margin-bottom: 10px; }
+  .fdot {
+    width: 32px; height: 32px; border-radius: 50%;
+    border: 2px solid var(--border);
+    transition: background 0.15s, border-color 0.15s, transform 0.2s;
+    cursor: pointer;
+    position: relative;
+  }
+  .fdot.active.t1 { background: var(--accent1); border-color: var(--accent1); }
+  .fdot.active.t2 { background: var(--accent2); border-color: var(--accent2); }
+  .fdot.pop { animation: dotPop 0.3s ease; }
+  @keyframes dotPop { 0%{transform:scale(1)} 50%{transform:scale(1.5)} 100%{transform:scale(1)} }
+
+  .btn-fault {
+    display: block; width: 100%; padding: 8px;
+    border-radius: 6px; border: 1px solid var(--border);
+    background: transparent; color: var(--yellow);
+    font-family: 'DM Mono', monospace; font-size: 0.72rem;
+    cursor: pointer; text-align: center;
+  }
+  .btn-fault:hover { background: rgba(255,214,10,0.08); }
+  .btn-fault:disabled { opacity: 0.35; cursor: not-allowed; }
 
   /* Sync bar */
-  .sync-bar { display: flex; align-items: center; gap: 8px; font-size: 0.65rem; color: var(--muted); margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
-  .sync-bar .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); flex-shrink: 0; }
-  .sync-bar.syncing .sync-dot { background: var(--yellow); animation: pulse 0.8s infinite; }
-  .sync-bar.synced .sync-dot { background: var(--green); }
-  .sync-bar.error .sync-dot { background: var(--red); }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .sync-bar { display: flex; align-items: center; gap: 8px; font-size: 0.62rem; color: var(--muted); margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); }
+  .sdot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); flex-shrink: 0; }
+  .sync-bar.syncing .sdot { background: var(--yellow); animation: pulse 0.7s infinite; }
+  .sync-bar.synced  .sdot { background: var(--green); }
+  .sync-bar.error   .sdot { background: var(--red); }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.2} }
 
-  .no-comp { text-align: center; color: var(--muted); font-size: 0.8rem; padding: 40px 0; }
+  /* Floating +1 */
+  .float-label {
+    position: fixed;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 5rem;
+    pointer-events: none;
+    z-index: 999;
+    animation: floatUp 1.2s ease forwards;
+    text-shadow: 0 0 30px currentColor;
+  }
+  @keyframes floatUp {
+    0%   { opacity: 1; transform: translateY(0) scale(1); }
+    60%  { opacity: 1; transform: translateY(-80px) scale(1.1); }
+    100% { opacity: 0; transform: translateY(-140px) scale(0.8); }
+  }
+
+  /* Confetti canvas */
+  #confettiCanvas {
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 998;
+  }
+
+  /* Fault flash overlay */
+  .fault-flash {
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 997;
+    opacity: 0;
+  }
+  .fault-flash.t1 { background: radial-gradient(ellipse at center, rgba(255,77,77,0.25) 0%, transparent 70%); }
+  .fault-flash.t2 { background: radial-gradient(ellipse at center, rgba(77,170,255,0.25) 0%, transparent 70%); }
+  .fault-flash.show { animation: flashIn 0.5s ease; }
+  @keyframes flashIn { 0%{opacity:0} 20%{opacity:1} 100%{opacity:0} }
+
+  /* Spinner */
+  .spinner { display: none; width: 13px; height: 13px; border: 2px solid rgba(0,0,0,0.25); border-top-color: #000; border-radius: 50%; animation: spin 0.6s linear infinite; vertical-align: middle; margin-left: 6px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner.show { display: inline-block; }
 
   /* Toast */
-  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--green); color: #000; font-family: 'DM Mono', monospace; font-size: 0.78rem; padding: 10px 20px; border-radius: 30px; transition: transform 0.3s ease; z-index: 100; }
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--green); color: #000; font-family: 'DM Mono', monospace; font-size: 0.78rem; padding: 10px 22px; border-radius: 30px; transition: transform 0.3s ease; z-index: 1000; }
   .toast.show { transform: translateX(-50%) translateY(0); }
   .toast.error { background: var(--accent1); color: #fff; }
+  .toast.warn  { background: var(--yellow); color: #000; }
 
   /* Modal */
-  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; align-items: center; justify-content: center; }
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 500; align-items: center; justify-content: center; }
   .modal-overlay.show { display: flex; }
-  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 28px; max-width: 360px; width: 90%; }
-  .modal h3 { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: 3px; margin-bottom: 10px; }
-  .modal p { font-size: 0.78rem; color: var(--muted); margin-bottom: 20px; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 28px; max-width: 340px; width: 90%; }
+  .modal h3 { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: 3px; margin-bottom: 8px; }
+  .modal p  { font-size: 0.76rem; color: var(--muted); margin-bottom: 20px; }
   .modal-btns { display: flex; gap: 10px; }
   .modal-btns button { flex: 1; padding: 10px; border-radius: 8px; border: none; font-family: 'DM Mono', monospace; font-size: 0.8rem; cursor: pointer; }
-  .modal-cancel { background: var(--border); color: var(--text); }
+  .modal-cancel  { background: var(--border); color: var(--text); }
   .modal-confirm { background: var(--red); color: #fff; }
+
+  .no-comp { text-align: center; color: var(--muted); font-size: 0.8rem; padding: 20px 0; }
+
+  /* Chrono mi-temps */
+  .btn-icon.halftime { border-color: rgba(61,220,132,0.5); color: var(--green); }
+  .btn-icon.halftime:hover { background: rgba(61,220,132,0.1); }
+  .btn-icon.halftime.running { background: var(--green); color: #000; border-color: var(--green); animation: hfPulse 1s infinite; }
+  @keyframes hfPulse { 0%,100%{opacity:1} 50%{opacity:0.7} }
+
+  .halftime-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 600; align-items: center; justify-content: center; }
+  .halftime-modal.show { display: flex; }
+  .halftime-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 32px;
+    max-width: 380px;
+    width: 90%;
+    text-align: center;
+  }
+  .halftime-box h3 { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; letter-spacing: 4px; margin-bottom: 6px; color: var(--green); }
+  .halftime-box p  { font-size: 0.72rem; color: var(--muted); margin-bottom: 24px; }
+  .chrono-display {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 5rem;
+    letter-spacing: 6px;
+    color: var(--green);
+    margin-bottom: 20px;
+    line-height: 1;
+  }
+  .chrono-display.urgent { color: var(--red); animation: urgentPulse 0.5s infinite; }
+  @keyframes urgentPulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  .duration-picker { display: flex; gap: 8px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap; }
+  .dur-btn { background: var(--bg); border: 1px solid var(--border); color: var(--muted); font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 2px; padding: 8px 16px; border-radius: 8px; cursor: pointer; }
+  .dur-btn:hover { border-color: var(--green); color: var(--green); }
+  .dur-btn.active { background: var(--green); color: #000; border-color: var(--green); }
+
+  .custom-dur { display: flex; gap: 8px; align-items: center; justify-content: center; margin-bottom: 20px; }
+  .custom-dur input { width: 70px; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 0.9rem; padding: 8px; border-radius: 6px; outline: none; text-align: center; }
+  .custom-dur input:focus { border-color: var(--green); }
+  .custom-dur label { font-size: 0.7rem; color: var(--muted); }
+
+  .halftime-btns { display: flex; gap: 10px; }
+  .halftime-btns button { flex: 1; padding: 11px; border-radius: 8px; border: none; font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 2px; cursor: pointer; }
+  .hf-start  { background: var(--green); color: #000; }
+  .hf-stop   { background: var(--red); color: #fff; }
+  .hf-close  { background: var(--border); color: var(--text); }
 </style>
 </head>
 <body>
+
+<canvas id="confettiCanvas"></canvas>
+<div class="fault-flash t1" id="flash1"></div>
+<div class="fault-flash t2" id="flash2"></div>
 
 <div class="header">
   <h1>IMPRO ADMIN</h1>
@@ -125,41 +354,93 @@
     <button class="mode-btn sheet" id="btnSheet" onclick="setMode('sheet')">☁ SHEET</button>
   </div>
 </div>
-<div class="mode-badge" id="modeBadge">
-  <span class="dot"></span>
-  <span id="modeLabel">—</span>
+<div class="mode-badge" id="modeBadge"><span class="dot"></span><span id="modeLabel">—</span></div>
+
+<!-- ==================== SETUP SCREEN ==================== -->
+<div id="setupScreen">
+  <div class="setup-arena">
+    <div class="setup-team left">
+      <div class="team-side-label">◀ ÉQUIPE GAUCHE</div>
+      <input class="team-name-input" type="text" id="newTeam1" placeholder="LES ILLUMINÉS" />
+    </div>
+
+    <div class="setup-center">
+      <div class="setup-vs">VS</div>
+      <div class="field-sm">
+        <label>NOM DE LA COMPÉT.</label>
+        <input type="text" id="newCompName" placeholder="Finale 2025" />
+      </div>
+    </div>
+
+    <div class="setup-team right">
+      <div class="team-side-label">ÉQUIPE DROITE ▶</div>
+      <input class="team-name-input" type="text" id="newTeam2" placeholder="LES FARCEURS" />
+    </div>
+  </div>
+  <button class="btn-create-big" id="btnCreate" onclick="createCompetition()">
+    + LANCER LA COMPÉTITION <span class="spinner" id="spinCreate"></span>
+  </button>
+  <div style="margin-top:16px; text-align:center">
+    <button class="btn-icon" onclick="showGame()" style="font-size:0.7rem">ou charger une compét existante →</button>
+  </div>
 </div>
 
-<div class="panels">
-  <div>
-    <div class="panel" style="margin-bottom:16px">
-      <div class="panel-title">NOUVELLE COMPÉTITION</div>
-      <div class="field"><label>NOM</label><input type="text" id="newCompName" placeholder="Finale Printemps 2025" /></div>
-      <div class="field"><label>ÉQUIPE 1</label><input type="text" id="newTeam1" placeholder="Les Illuminés" /></div>
-      <div class="field"><label>ÉQUIPE 2</label><input type="text" id="newTeam2" placeholder="Les Farceurs" /></div>
-      <button class="btn-create" id="btnCreate" onclick="createCompetition()">
-        + CRÉER <span class="spinner" id="spinCreate"></span>
-      </button>
-    </div>
-    <div class="panel">
-      <div class="panel-title">COMPÉTITION ACTIVE</div>
+<!-- ==================== GAME SCREEN ==================== -->
+<div id="gameScreen">
+  <div class="game-header">
+    <div class="comp-select-row">
       <select class="select-comp" id="compSelect" onchange="loadComp()">
         <option value="">— Sélectionner —</option>
       </select>
-      <button class="btn-sm" id="btnRefresh" onclick="fetchCompetitions()">
-        ↻ Rafraîchir <span class="spinner" id="spinRefresh"></span>
-      </button>
-      <button class="btn-warn" id="btnReset" onclick="confirmAction('reset')" style="display:none">⟳ Réinitialiser</button>
-      <button class="btn-danger" id="btnDelete" onclick="confirmAction('delete')" style="display:none">✕ Supprimer</button>
+      <button class="btn-icon" onclick="fetchCompetitions()">↻ <span class="spinner" id="spinRefresh"></span></button>
+    </div>
+    <div class="game-actions">
+      <button class="btn-icon new" onclick="showSetup()">+ Nouvelle</button>
+      <button class="btn-icon halftime" id="btnHalftime" onclick="openHalftimeModal()">⏱ Mi-temps</button>
+      <button class="btn-icon warn" id="btnReset" onclick="confirmAction('reset')" style="display:none">⟳ Reset</button>
+      <button class="btn-icon danger" id="btnDelete" onclick="confirmAction('delete')" style="display:none">✕ Suppr.</button>
     </div>
   </div>
 
-  <div class="panel" id="scorePanel">
-    <div class="no-comp">Sélectionne une compétition pour commencer.</div>
+  <div id="scoreboard" class="scoreboard">
+    <div class="no-comp" style="grid-column:1/-1">Sélectionne une compétition.</div>
+  </div>
+
+  <div class="sync-bar" id="syncBar">
+    <span class="sdot"></span>
+    <span id="syncText">—</span>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- ==================== MODAL MI-TEMPS ==================== -->
+<div class="halftime-modal" id="halftimeModal">
+  <div class="halftime-box">
+    <h3>⏱ MI-TEMPS</h3>
+    <p>Règle la durée et lance le chrono — visible sur le plateau</p>
+
+    <div class="chrono-display" id="chronoDisplay">15:00</div>
+
+    <div class="duration-picker">
+      <button class="dur-btn" onclick="setDuration(5)">5 min</button>
+      <button class="dur-btn active" onclick="setDuration(15)">15 min</button>
+      <button class="dur-btn" onclick="setDuration(20)">20 min</button>
+      <button class="dur-btn" onclick="setDuration(30)">30 min</button>
+    </div>
+    <div class="custom-dur">
+      <label>Durée custom :</label>
+      <input type="number" id="customDur" min="1" max="99" placeholder="min" oninput="setDuration(parseInt(this.value)||0, true)" />
+      <label>min</label>
+    </div>
+
+    <div class="halftime-btns">
+      <button class="hf-close" onclick="closeHalftimeModal()">Fermer</button>
+      <button class="hf-stop" id="hfStopBtn" onclick="stopHalftime()" style="display:none">⏹ Stop</button>
+      <button class="hf-start" id="hfStartBtn" onclick="startHalftime()">▶ Lancer</button>
+    </div>
+  </div>
+</div>
 
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
@@ -173,13 +454,19 @@
 </div>
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzpOS-zHRPZJE9551YPivGgDdo91IEB4l_kBdFn-dwbw-fQ_fXCfIdNKjDipnmpjR5o/exec";
-const LS_STATE_KEY   = 'impro_local_state';
+const SCRIPT_URL      = "https://script.google.com/macros/s/AKfycbxBQNBaa3vgQbtNjb2wVjdbM9mMHcYohuLnTQIMJAJ5el2y2qyT76lcspSPqTLUrAnG/exec";
+const LS_STATE_KEY    = 'impro_local_state';
 const LS_COMPLIST_KEY = 'impro_local_complist';
+const LS_CHRONO_KEY   = 'impro_chrono';
 
-let mode  = localStorage.getItem('impro_mode') || 'sheet'; // 'local' | 'sheet'
+let mode  = localStorage.getItem('impro_mode') || 'sheet';
 let state = { comp: null, team1: '', team2: '', score1: 0, score2: 0, faults1: 0, faults2: 0 };
-let isSyncing = false;
+let pendingAction = null;
+
+// Chrono state
+let chronoDuration = 15 * 60; // secondes
+let chronoEndTime  = null;    // timestamp ms de fin
+let chronoInterval = null;
 
 // ============================================================
 // MODE
@@ -188,10 +475,8 @@ function setMode(m) {
   mode = m;
   localStorage.setItem('impro_mode', m);
   updateModeUI();
-  // Reset et recharge
   state = { comp: null, team1: '', team2: '', score1: 0, score2: 0, faults1: 0, faults2: 0 };
-  document.getElementById('compSelect').value = '';
-  document.getElementById('scorePanel').innerHTML = '<div class="no-comp">Sélectionne une compétition pour commencer.</div>';
+  document.getElementById('scoreboard').innerHTML = '<div class="no-comp" style="grid-column:1/-1">Sélectionne une compétition.</div>';
   document.getElementById('btnReset').style.display = 'none';
   document.getElementById('btnDelete').style.display = 'none';
   fetchCompetitions();
@@ -207,8 +492,24 @@ function updateModeUI() {
     : 'Mode SHEET — synchronisation Google Sheets';
 }
 
+function showSetup() {
+  document.getElementById('setupScreen').classList.add('show');
+  document.getElementById('gameScreen').classList.remove('show');
+}
+function showGame() {
+  document.getElementById('setupScreen').classList.remove('show');
+  document.getElementById('gameScreen').classList.add('show');
+  fetchCompetitions();
+}
+
+window.onload = () => {
+  updateModeUI();
+  showSetup();
+  resumeChronoIfActive();
+};
+
 // ============================================================
-// API SHEET
+// DATA
 // ============================================================
 async function apiSheet(params) {
   const url = new URL(SCRIPT_URL);
@@ -217,33 +518,25 @@ async function apiSheet(params) {
   return res.json();
 }
 
-// ============================================================
-// API LOCAL (localStorage)
-// ============================================================
 function localGetCompetitions() {
   const list = JSON.parse(localStorage.getItem(LS_COMPLIST_KEY) || '[]');
   return { competitions: [...list].reverse() };
 }
-
 function localCreateCompetition(name, team1, team2) {
   const list = JSON.parse(localStorage.getItem(LS_COMPLIST_KEY) || '[]');
   if (list.find(c => c.name === name)) return { error: 'Compétition déjà existante' };
   const now = new Date().toISOString();
   list.push({ name, team1, team2, created: now });
   localStorage.setItem(LS_COMPLIST_KEY, JSON.stringify(list));
-  // Init le score
   const scores = JSON.parse(localStorage.getItem(LS_STATE_KEY) || '{}');
   scores[name] = { team1, team2, score1: 0, score2: 0, faults1: 0, faults2: 0, lastUpdate: now };
   localStorage.setItem(LS_STATE_KEY, JSON.stringify(scores));
   return { success: true, comp: name };
 }
-
 function localGetScore(compName) {
   const scores = JSON.parse(localStorage.getItem(LS_STATE_KEY) || '{}');
-  if (!scores[compName]) return { error: 'Compétition introuvable' };
-  return scores[compName];
+  return scores[compName] || { error: 'Compétition introuvable' };
 }
-
 function localUpdateScore(compName, score1, score2, faults1, faults2) {
   const scores = JSON.parse(localStorage.getItem(LS_STATE_KEY) || '{}');
   if (!scores[compName]) return { error: 'Compétition introuvable' };
@@ -251,7 +544,6 @@ function localUpdateScore(compName, score1, score2, faults1, faults2) {
   localStorage.setItem(LS_STATE_KEY, JSON.stringify(scores));
   return { success: true };
 }
-
 function localResetComp(compName) {
   const scores = JSON.parse(localStorage.getItem(LS_STATE_KEY) || '{}');
   if (!scores[compName]) return { error: 'Compétition introuvable' };
@@ -259,7 +551,6 @@ function localResetComp(compName) {
   localStorage.setItem(LS_STATE_KEY, JSON.stringify(scores));
   return { success: true };
 }
-
 function localDeleteComp(compName) {
   let list = JSON.parse(localStorage.getItem(LS_COMPLIST_KEY) || '[]');
   list = list.filter(c => c.name !== compName);
@@ -270,12 +561,8 @@ function localDeleteComp(compName) {
   return { success: true };
 }
 
-// ============================================================
-// DISPATCH (choisit local ou sheet)
-// ============================================================
 async function doAction(params) {
   if (mode === 'local') {
-    // Synchrone pour le local
     const { action } = params;
     if (action === 'getCompetitions')  return localGetCompetitions();
     if (action === 'getScore')         return localGetScore(params.comp);
@@ -283,38 +570,13 @@ async function doAction(params) {
     if (action === 'updateScore')      return localUpdateScore(params.comp, params.score1, params.score2, params.faults1, params.faults2);
     if (action === 'resetComp')        return localResetComp(params.comp);
     if (action === 'deleteComp')       return localDeleteComp(params.comp);
-  } else {
-    return apiSheet(params);
   }
-}
-
-// ============================================================
-// SPINNERS / LOCK
-// ============================================================
-function spin(id, on) {
-  document.getElementById(id)?.classList.toggle('show', on);
-}
-
-function lockButtons(on) {
-  ['btnCreate','btnRefresh','btnReset','btnDelete'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.disabled = on;
-  });
-  document.querySelectorAll('.btn-score, .fault-btn').forEach(el => el.disabled = on);
-}
-
-function setSyncBar(status, text) {
-  const bar = document.getElementById('syncBar');
-  if (!bar) return;
-  bar.className = 'sync-bar ' + status;
-  document.getElementById('syncText').textContent = text;
+  return apiSheet(params);
 }
 
 // ============================================================
 // COMPÉTITIONS
 // ============================================================
-window.onload = () => { updateModeUI(); fetchCompetitions(); };
-
 async function fetchCompetitions() {
   spin('spinRefresh', true);
   try {
@@ -336,18 +598,16 @@ async function fetchCompetitions() {
 
 async function createCompetition() {
   const name  = document.getElementById('newCompName').value.trim();
-  const team1 = document.getElementById('newTeam1').value.trim();
-  const team2 = document.getElementById('newTeam2').value.trim();
-  if (!name || !team1 || !team2) { showToast('Remplis tous les champs', true); return; }
+  const team1 = document.getElementById('newTeam1').value.trim() || 'ÉQUIPE 1';
+  const team2 = document.getElementById('newTeam2').value.trim() || 'ÉQUIPE 2';
+  if (!name) { showToast('Donne un nom à la compét', true); return; }
   spin('spinCreate', true);
   document.getElementById('btnCreate').disabled = true;
   try {
     const data = await doAction({ action: 'newCompetition', name, team1, team2 });
     if (data?.error) { showToast(data.error, true); return; }
     showToast('Compétition créée !');
-    document.getElementById('newCompName').value = '';
-    document.getElementById('newTeam1').value = '';
-    document.getElementById('newTeam2').value = '';
+    showGame();
     await fetchCompetitions();
     document.getElementById('compSelect').value = name;
     await loadComp();
@@ -362,141 +622,365 @@ async function loadComp() {
     const data = await doAction({ action: 'getScore', comp });
     if (!data || data.error) { showToast(data?.error || 'Erreur', true); return; }
     state = { comp, team1: data.team1, team2: data.team2, score1: data.score1, score2: data.score2, faults1: data.faults1, faults2: data.faults2 };
-    document.getElementById('btnReset').style.display = 'block';
-    document.getElementById('btnDelete').style.display = 'block';
-    renderScorePanel();
+    document.getElementById('btnReset').style.display = 'inline-block';
+    document.getElementById('btnDelete').style.display = 'inline-block';
+    renderScoreboard();
+    setSyncBar('synced', 'Chargé');
   } catch(e) { showToast('Erreur réseau', true); }
 }
 
 // ============================================================
-// SCORE PANEL
+// RENDER
 // ============================================================
-function renderScorePanel() {
-  document.getElementById('scorePanel').innerHTML = `
-    <div class="scoreboard">${renderTeam(1)}${renderTeam(2)}</div>
-    <div class="sync-bar" id="syncBar">
-      <span class="sync-dot"></span>
-      <span id="syncText">En attente…</span>
-    </div>`;
+function renderScoreboard() {
+  document.getElementById('scoreboard').innerHTML = `${renderCard(1)}${renderCard(2)}`;
 }
 
-function renderTeam(t) {
+function renderCard(t) {
   const name   = state[`team${t}`];
   const score  = state[`score${t}`];
   const faults = state[`faults${t}`];
-  const dots   = [1,2,3].map(i => `<div class="dot ${i <= faults ? 'active team'+t : ''}"></div>`).join('');
+  const cl     = t === 1 ? 't1' : 't2';
+  const dots   = [1,2,3].map(i =>
+    `<div class="fdot ${i <= faults ? 'active '+cl : ''}" id="fd${t}_${i}"></div>`
+  ).join('');
   return `
-    <div class="team-block team${t}">
-      <div class="team-name">${name}</div>
-      <div class="score-display">${score}</div>
+    <div class="team-card team${t}" id="card${t}">
+      <div class="team-card-name">${name}</div>
+      <div class="score-wrap">
+        <div class="score-display" id="scoreDisp${t}">${score}</div>
+      </div>
       <div class="score-btns">
         <button class="btn-score btn-plus" onclick="changeScore(${t}, 1)">+</button>
         <button class="btn-score btn-minus" onclick="changeScore(${t}, -1)">−</button>
       </div>
-      <div class="faults-label">FAUTES</div>
-      <div class="faults-dots">${dots}</div>
-      <button class="fault-btn" onclick="addFault(${t})">+ Ajouter une faute</button>
+      <div class="faults-section">
+        <div class="faults-title">FAUTES</div>
+        <div class="faults-dots">${dots}</div>
+        <button class="btn-fault" onclick="addFault(${t})">+ Ajouter une faute</button>
+      </div>
     </div>`;
 }
 
+// ============================================================
+// ACTIONS
+// ============================================================
 function changeScore(t, delta) {
-  state[`score${t}`] = Math.max(0, state[`score${t}`] + delta);
+  const prev = state[`score${t}`];
+  state[`score${t}`] = Math.max(0, prev + delta);
+  if (delta > 0 && state[`score${t}`] > prev) {
+    triggerScoreAnim(t);
+  }
   syncAndRender();
 }
 
 function addFault(t) {
   state[`faults${t}`]++;
+  triggerFaultAnim(t);
   if (state[`faults${t}`] >= 3) {
     const other = t === 1 ? 2 : 1;
     state[`score${other}`]++;
     state[`faults${t}`] = 0;
-    showToast(`3 fautes ! +1 pt pour ${state['team'+other]}`);
+    showToast(`3 fautes ! +1 pt → ${state['team'+other]}`, false, 'warn');
+    setTimeout(() => triggerScoreAnim(other), 200);
   }
   syncAndRender();
 }
 
 async function syncAndRender() {
-  renderScorePanel();
+  renderScoreboard();
   if (!state.comp) return;
-  setSyncBar('syncing', mode === 'local' ? 'Enregistrement local…' : 'Envoi vers le Sheet…');
-  lockButtons(true);
+  setSyncBar('syncing', mode === 'local' ? 'Enregistrement…' : 'Envoi vers le Sheet…');
+  setScoreButtons(false);
   try {
     const data = await doAction({
       action: 'updateScore', comp: state.comp,
       score1: state.score1, score2: state.score2,
       faults1: state.faults1, faults2: state.faults2
     });
-    if (data?.error) {
-      setSyncBar('error', 'Erreur : ' + data.error);
-      showToast(data.error, true);
+    if (data?.error) { setSyncBar('error', data.error); showToast(data.error, true); }
+    else setSyncBar('synced', mode === 'local' ? 'Enregistré ✓' : 'Synchronisé ✓');
+  } catch(e) { setSyncBar('error', 'Erreur réseau'); }
+  finally { setScoreButtons(true); }
+}
+
+function setScoreButtons(on) {
+  document.querySelectorAll('.btn-score, .btn-fault').forEach(el => el.disabled = !on);
+}
+
+// ============================================================
+// ANIMATIONS
+// ============================================================
+function triggerScoreAnim(t) {
+  // Pop score display
+  const disp = document.getElementById(`scoreDisp${t}`);
+  if (disp) {
+    disp.classList.remove('pop');
+    void disp.offsetWidth;
+    disp.classList.add('pop');
+    setTimeout(() => disp.classList.remove('pop'), 400);
+  }
+
+  // Floating +1
+  const card = document.getElementById(`card${t}`);
+  if (card) {
+    const rect = card.getBoundingClientRect();
+    const el = document.createElement('div');
+    el.className = 'float-label';
+    el.textContent = '+1';
+    el.style.color  = t === 1 ? '#ff4d4d' : '#4daaff';
+    el.style.left   = (rect.left + rect.width / 2 - 60) + 'px';
+    el.style.top    = (rect.top + rect.height / 2 - 40) + 'px';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1300);
+  }
+
+  // Confetti
+  launchConfetti(t);
+}
+
+function triggerFaultAnim(t) {
+  // Flash overlay
+  const flash = document.getElementById(`flash${t}`);
+  flash.classList.remove('show');
+  void flash.offsetWidth;
+  flash.classList.add('show');
+  setTimeout(() => flash.classList.remove('show'), 600);
+
+  // Dot pop
+  const faults = state[`faults${t}`];
+  const dot = document.getElementById(`fd${t}_${faults}`);
+  if (dot) {
+    dot.classList.add('pop');
+    setTimeout(() => dot.classList.remove('pop'), 400);
+  }
+}
+
+// ---- Confetti ----
+const canvas  = document.getElementById('confettiCanvas');
+const ctx     = canvas.getContext('2d');
+let particles = [];
+let animId    = null;
+
+function launchConfetti(t) {
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const colors = t === 1
+    ? ['#ff4d4d','#ff8888','#ffaaaa','#ffffff','#ffd60a']
+    : ['#4daaff','#88ccff','#aaddff','#ffffff','#3ddc84'];
+
+  for (let i = 0; i < 80; i++) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: -10,
+      vx: (Math.random() - 0.5) * 6,
+      vy: Math.random() * 4 + 2,
+      size: Math.random() * 10 + 5,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      rot: Math.random() * 360,
+      rotSpeed: (Math.random() - 0.5) * 10,
+      shape: Math.random() > 0.5 ? 'rect' : 'circle',
+      life: 1
+    });
+  }
+
+  if (!animId) animateConfetti();
+}
+
+function animateConfetti() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  particles = particles.filter(p => p.life > 0);
+
+  particles.forEach(p => {
+    p.x   += p.vx;
+    p.y   += p.vy;
+    p.rot += p.rotSpeed;
+    p.vy  += 0.15;
+    p.life -= 0.012;
+
+    ctx.save();
+    ctx.globalAlpha = Math.max(0, p.life);
+    ctx.translate(p.x, p.y);
+    ctx.rotate(p.rot * Math.PI / 180);
+    ctx.fillStyle = p.color;
+    if (p.shape === 'rect') {
+      ctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2);
     } else {
-      setSyncBar('synced', mode === 'local' ? 'Enregistré localement' : 'Synchronisé avec le Sheet ✓');
+      ctx.beginPath();
+      ctx.arc(0, 0, p.size / 2, 0, Math.PI * 2);
+      ctx.fill();
     }
-  } catch(e) {
-    setSyncBar('error', 'Erreur réseau');
-    showToast('Erreur réseau', true);
-  } finally {
-    lockButtons(false);
+    ctx.restore();
+  });
+
+  if (particles.length > 0) {
+    animId = requestAnimationFrame(animateConfetti);
+  } else {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    animId = null;
   }
 }
 
 // ============================================================
 // RESET / DELETE
 // ============================================================
-let pendingAction = null;
-
 function confirmAction(action) {
   pendingAction = action;
-  const isDelete = action === 'delete';
-  document.getElementById('modalTitle').textContent = isDelete ? 'SUPPRIMER ?' : 'RÉINITIALISER ?';
-  document.getElementById('modalText').textContent  = isDelete
+  const isDel = action === 'delete';
+  document.getElementById('modalTitle').textContent = isDel ? 'SUPPRIMER ?' : 'RÉINITIALISER ?';
+  document.getElementById('modalText').textContent  = isDel
     ? `Supprimer définitivement "${state.comp}" ?`
     : `Remettre les scores de "${state.comp}" à zéro ?`;
-  document.getElementById('modalConfirmBtn').textContent = isDelete ? 'Supprimer' : 'Réinitialiser';
+  document.getElementById('modalConfirmBtn').textContent = isDel ? 'Supprimer' : 'Réinitialiser';
   document.getElementById('modalOverlay').classList.add('show');
 }
-
 function closeModal() {
   document.getElementById('modalOverlay').classList.remove('show');
   pendingAction = null;
 }
-
 document.getElementById('modalConfirmBtn').onclick = async () => {
   closeModal();
   if (!pendingAction || !state.comp) return;
   setSyncBar('syncing', pendingAction === 'delete' ? 'Suppression…' : 'Réinitialisation…');
-  lockButtons(true);
   try {
-    const data = await doAction({
-      action: pendingAction === 'delete' ? 'deleteComp' : 'resetComp',
-      comp: state.comp
-    });
-    if (data?.error) { showToast(data.error, true); setSyncBar('error', data.error); return; }
+    const data = await doAction({ action: pendingAction === 'delete' ? 'deleteComp' : 'resetComp', comp: state.comp });
+    if (data?.error) { showToast(data.error, true); return; }
     showToast(pendingAction === 'delete' ? 'Supprimé !' : 'Remis à zéro !');
     if (pendingAction === 'delete') {
       state = { comp: null, team1: '', team2: '', score1: 0, score2: 0, faults1: 0, faults2: 0 };
       document.getElementById('compSelect').value = '';
-      document.getElementById('scorePanel').innerHTML = '<div class="no-comp">Sélectionne une compétition pour commencer.</div>';
+      document.getElementById('scoreboard').innerHTML = '<div class="no-comp" style="grid-column:1/-1">Sélectionne une compétition.</div>';
       document.getElementById('btnReset').style.display = 'none';
       document.getElementById('btnDelete').style.display = 'none';
+      setSyncBar('synced', '—');
       await fetchCompetitions();
     } else {
       state.score1 = 0; state.score2 = 0; state.faults1 = 0; state.faults2 = 0;
-      renderScorePanel();
+      renderScoreboard();
       setSyncBar('synced', 'Remis à zéro ✓');
     }
   } catch(e) { showToast('Erreur réseau', true); }
-  finally { lockButtons(false); }
 };
 
 // ============================================================
-// TOAST
+// CHRONO MI-TEMPS
 // ============================================================
+function openHalftimeModal() {
+  // Relit le chrono depuis LS si en cours
+  const saved = JSON.parse(localStorage.getItem(LS_CHRONO_KEY) || 'null');
+  if (saved && saved.endTime && saved.endTime > Date.now()) {
+    chronoEndTime = saved.endTime;
+    chronoDuration = saved.duration;
+    startChronoTick();
+    document.getElementById('hfStartBtn').style.display = 'none';
+    document.getElementById('hfStopBtn').style.display  = 'inline-block';
+  } else {
+    updateChronoDisplay(chronoDuration);
+  }
+  document.getElementById('halftimeModal').classList.add('show');
+}
+
+function closeHalftimeModal() {
+  document.getElementById('halftimeModal').classList.remove('show');
+}
+
+function setDuration(min, custom = false) {
+  if (!min || min <= 0) return;
+  chronoDuration = min * 60;
+  // Si chrono pas en cours, met à jour l'affichage
+  if (!chronoEndTime || chronoEndTime <= Date.now()) {
+    updateChronoDisplay(chronoDuration);
+  }
+  if (!custom) {
+    document.querySelectorAll('.dur-btn').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+    document.getElementById('customDur').value = '';
+  }
+}
+
+function startHalftime() {
+  chronoEndTime = Date.now() + chronoDuration * 1000;
+  // Sauvegarde dans LS pour le plateau
+  const data = { endTime: chronoEndTime, duration: chronoDuration, active: true };
+  localStorage.setItem(LS_CHRONO_KEY, JSON.stringify(data));
+  // Mode sheet : on pourrait pusher vers GS mais c'est overkill, on reste LS pour le chrono
+  document.getElementById('hfStartBtn').style.display = 'none';
+  document.getElementById('hfStopBtn').style.display  = 'inline-block';
+  document.getElementById('btnHalftime').classList.add('running');
+  startChronoTick();
+}
+
+function stopHalftime() {
+  clearInterval(chronoInterval);
+  chronoInterval = null;
+  chronoEndTime  = null;
+  localStorage.setItem(LS_CHRONO_KEY, JSON.stringify({ active: false }));
+  document.getElementById('hfStartBtn').style.display = 'inline-block';
+  document.getElementById('hfStopBtn').style.display  = 'none';
+  document.getElementById('btnHalftime').classList.remove('running');
+  updateChronoDisplay(chronoDuration);
+  document.getElementById('chronoDisplay').classList.remove('urgent');
+}
+
+function startChronoTick() {
+  clearInterval(chronoInterval);
+  chronoInterval = setInterval(() => {
+    const remaining = Math.max(0, Math.round((chronoEndTime - Date.now()) / 1000));
+    updateChronoDisplay(remaining);
+    // Urgent sous 30s
+    document.getElementById('chronoDisplay').classList.toggle('urgent', remaining <= 30 && remaining > 0);
+    // Bouton clignote
+    document.getElementById('btnHalftime').classList.toggle('running', remaining > 0);
+    if (remaining <= 0) {
+      stopHalftime();
+      showToast('⏱ Mi-temps terminée !', false, 'warn');
+    }
+    // Sync LS pour plateau
+    if (chronoEndTime) {
+      const saved = JSON.parse(localStorage.getItem(LS_CHRONO_KEY) || '{}');
+      saved.remaining = remaining;
+      localStorage.setItem(LS_CHRONO_KEY, JSON.stringify(saved));
+    }
+  }, 500);
+}
+
+function updateChronoDisplay(seconds) {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  document.getElementById('chronoDisplay').textContent =
+    String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+}
+
+// Relit chrono au chargement si en cours
+function resumeChronoIfActive() {
+  const saved = JSON.parse(localStorage.getItem(LS_CHRONO_KEY) || 'null');
+  if (saved && saved.active && saved.endTime && saved.endTime > Date.now()) {
+    chronoEndTime  = saved.endTime;
+    chronoDuration = saved.duration;
+    document.getElementById('btnHalftime').classList.add('running');
+    startChronoTick();
+  }
+}
+
+// ============================================================
+// UI HELPERS
+// ============================================================
+function setSyncBar(status, text) {
+  const bar = document.getElementById('syncBar');
+  bar.className = 'sync-bar ' + status;
+  document.getElementById('syncText').textContent = text;
+}
+
+function spin(id, on) {
+  const el = document.getElementById(id);
+  if (el) el.classList.toggle('show', on);
+}
+
 let toastTimer;
-function showToast(msg, error = false) {
+function showToast(msg, error = false, type = '') {
   const t = document.getElementById('toast');
   t.textContent = msg;
-  t.className = 'toast show' + (error ? ' error' : '');
+  t.className = 'toast show' + (error ? ' error' : '') + (type === 'warn' ? ' warn' : '');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => { t.className = 'toast'; }, 3000);
 }
